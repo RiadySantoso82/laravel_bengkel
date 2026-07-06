@@ -1,0 +1,70 @@
+<div style="max-width:380px;margin:0 auto;background:var(--surface-1);border-radius:20px;padding:1.25rem;">
+<h2 class="sr-only">Detail servis order dengan checklist pengecekan kendaraan dan opsi update status pekerjaan</h2>
+
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+  <button style="width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;" aria-label="Kembali" onclick="sendPrompt('Kembali ke daftar servis saya')">
+    <i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i>
+  </button>
+  <p style="font-weight:500;font-size:15px;margin:0;">Detail servis order</p>
+</div>
+
+<div style="background:var(--surface-2);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+    <p style="font-size:15px;font-weight:500;margin:0;">Honda Vario · B 1234 XYZ</p>
+    <span style="background:var(--bg-danger);color:var(--text-danger);font-size:11px;padding:2px 8px;border-radius:999px;">Dikerjakan</span>
+  </div>
+  <p style="font-size:13px;color:var(--text-secondary);margin:0 0 4px;">Keluhan: rem belakang bunyi</p>
+  <p style="font-size:13px;color:var(--text-secondary);margin:0;">Pelanggan: Andi Prasetyo · masuk 08:30</p>
+</div>
+
+<p style="font-size:13px;font-weight:500;color:var(--text-secondary);margin:0 0 8px;">Checklist pengecekan</p>
+
+<div style="display:flex;flex-direction:column;gap:2px;margin-bottom:1.25rem;">
+
+  <label style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:0.5px solid var(--border);">
+    <input type="checkbox" checked style="width:18px;height:18px;" />
+    <span style="font-size:14px;">Cek kondisi oli mesin</span>
+  </label>
+
+  <label style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:0.5px solid var(--border);">
+    <input type="checkbox" checked style="width:18px;height:18px;" />
+    <span style="font-size:14px;">Cek tekanan & kondisi ban</span>
+  </label>
+
+  <label style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:0.5px solid var(--border);">
+    <input type="checkbox" style="width:18px;height:18px;" />
+    <span style="font-size:14px;">Cek kampas rem depan & belakang</span>
+  </label>
+
+  <label style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:0.5px solid var(--border);">
+    <input type="checkbox" style="width:18px;height:18px;" />
+    <span style="font-size:14px;">Cek aki & kelistrikan</span>
+  </label>
+
+  <label style="display:flex;align-items:center;gap:10px;padding:10px 4px;">
+    <input type="checkbox" style="width:18px;height:18px;" />
+    <span style="font-size:14px;">Cek rantai & gir set</span>
+  </label>
+
+</div>
+
+<p style="font-size:13px;font-weight:500;color:var(--text-secondary);margin:0 0 8px;">Foto kondisi kendaraan</p>
+<div style="display:flex;gap:8px;margin-bottom:1.25rem;">
+  <div style="width:64px;height:64px;border-radius:var(--radius);background:var(--surface-2);display:flex;align-items:center;justify-content:center;">
+    <i class="ti ti-photo" style="font-size:20px;color:var(--text-muted);" aria-hidden="true"></i>
+  </div>
+  <button style="width:64px;height:64px;padding:0;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;" aria-label="Tambah foto" onclick="sendPrompt('Simulasikan upload foto kondisi kendaraan')">
+    <i class="ti ti-plus" style="font-size:20px;" aria-hidden="true"></i>
+  </button>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px;">
+  <button style="padding:10px;text-align:center;background:var(--fill-primary);color:var(--on-primary);border:none;border-radius:var(--radius);font-size:14px;font-weight:500;" onclick="sendPrompt('Update status servis order menjadi selesai')">
+    Tandai selesai
+  </button>
+  <button style="padding:10px;text-align:center;font-size:14px;" onclick="sendPrompt('Ajukan request part tambahan untuk servis order ini')">
+    Request part tambahan
+  </button>
+</div>
+
+</div>

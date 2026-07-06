@@ -73,7 +73,7 @@
                                 <td>
                                     <div class="actions">
                                         <a href="{{ route('suppliers.edit', $item) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
-                                        <form method="POST" action="{{ route('suppliers.destroy', $item) }}" onsubmit="return confirm('Hapus data ini?')">@csrf @method('DELETE')<button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></form>
+                                        <form method="POST" action="{{ route('suppliers.destroy', $item) }}" onsubmit="confirmForm(this, 'Hapus data ini?')">@csrf @method('DELETE')<button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></form>
                                     </div>
                                 </td>
                             </tr>

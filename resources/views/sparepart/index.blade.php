@@ -43,7 +43,26 @@
         <div class="card">
             <div class="card-body">
                 @if ($data->isEmpty())
-                    <div style="text-align:center;padding:60px 20px;color:#94a3b8;"><i class="fas fa-cogs" style="font-size:48px;margin-bottom:16px;"></i><h3 style="color:#475569;">Belum ada sparepart</h3><p style="margin-bottom:20px;">Tambahkan sparepart baru.</p><a href="{{ route('spareparts.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah Sparepart</a></div>
+                    <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
+                        <i class="fas fa-cogs" style="font-size:48px;margin-bottom:16px;"></i>
+                        <h3 style="color:#475569;margin-bottom:8px;">Belum ada data sparepart</h3>
+                        <p style="margin-bottom:24px;font-size:14px;">Isi dengan data demo atau input manual.</p>
+                        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;">
+                            <form method="POST" action="{{ route('spareparts.demo') }}" style="display:inline;">
+                                @csrf <input type="hidden" name="count" value="10">
+                                <button class="btn btn-success" style="background:#059669;color:#fff;"><i class="fas fa-database"></i> Demo 10</button>
+                            </form>
+                            <form method="POST" action="{{ route('spareparts.demo') }}" style="display:inline;">
+                                @csrf <input type="hidden" name="count" value="20">
+                                <button class="btn btn-success" style="background:#059669;color:#fff;"><i class="fas fa-database"></i> Demo 20</button>
+                            </form>
+                            <form method="POST" action="{{ route('spareparts.demo') }}" style="display:inline;">
+                                @csrf <input type="hidden" name="count" value="50">
+                                <button class="btn btn-success" style="background:#059669;color:#fff;"><i class="fas fa-database"></i> Demo 50</button>
+                            </form>
+                        </div>
+                        <a href="{{ route('spareparts.create') }}" class="btn btn-primary" style="background:#0f3460;color:#fff;"><i class="fas fa-plus"></i> Input Manual</a>
+                    </div>
                 @else
                     <table>
                         <thead><tr><th>No</th><th>Kode</th><th>Nama</th><th>Kategori</th><th>Satuan</th><th style="text-align:right;">Harga Jual</th><th style="text-align:right;">Stok</th><th>Aksi</th></tr></thead>

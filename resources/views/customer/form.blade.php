@@ -33,6 +33,12 @@
                 <div class="form-group"><label for="phone">Telepon</label><input type="text" id="phone" name="phone" class="form-control" value="{{ old('phone', $customer->phone ?? '') }}"></div>
                 <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" class="form-control" value="{{ old('email', $customer->email ?? '') }}"></div>
                 <div class="form-group"><label for="address">Alamat</label><textarea id="address" name="address" class="form-control">{{ old('address', $customer->address ?? '') }}</textarea></div>
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;">
+                        <input type="checkbox" name="is_walk_in" value="1" {{ old('is_walk_in', $customer->is_walk_in ?? false) ? 'checked' : '' }}>
+                        <span>Pelanggan Tidak Tetap (Walk-in)</span>
+                    </label>
+                </div>
                 <div class="form-actions"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button><a href="{{ route('customers.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a></div>
             </form>
         </div></div>

@@ -9,6 +9,7 @@
         justify-content: center;
         align-items: center;
         min-height: 100vh;
+        padding: 20px;
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     }
     .login-card {
@@ -16,6 +17,7 @@
         border-radius: 12px;
         padding: 40px;
         width: 400px;
+        max-width: 100%;
         box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     }
     .login-card .logo {

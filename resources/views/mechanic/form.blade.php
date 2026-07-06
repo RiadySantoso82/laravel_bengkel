@@ -25,7 +25,7 @@
 <div class="dashboard">
     @include('layouts.sidebar')
     <main class="main-content">
-        <div class="page-header"><h1><i class="fas fa-user-hard-hat"></i> {{ isset($mechanic) ? 'Edit Mekanik' : 'Tambah Mekanik' }}</h1></div>
+        <div class="page-header"><h1><i class="fas fa-user-cog"></i> {{ isset($mechanic) ? 'Edit Mekanik' : 'Tambah Mekanik' }}</h1></div>
         <div class="card"><div class="card-body">
             <form method="POST" action="{{ isset($mechanic) ? route('mechanics.update', $mechanic) : route('mechanics.store') }}">
                 @csrf @if (isset($mechanic)) @method('PUT') @endif

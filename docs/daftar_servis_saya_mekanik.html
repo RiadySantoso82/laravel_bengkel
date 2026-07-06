@@ -1,0 +1,67 @@
+<div style="max-width:380px;margin:0 auto;background:var(--surface-1);border-radius:20px;padding:1.25rem;">
+<h2 class="sr-only">Daftar servis order yang di-assign ke mekanik, dengan filter status dan detail tiap job</h2>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+  <p style="font-weight:500;font-size:16px;margin:0;">Servis saya</p>
+  <span style="font-size:13px;color:var(--text-secondary);">4 job</span>
+</div>
+
+<div style="display:flex;gap:8px;margin-bottom:1.25rem;overflow-x:auto;">
+  <button style="padding:6px 14px;font-size:13px;white-space:nowrap;background:var(--fill-primary);color:var(--on-primary);border-radius:999px;border:none;">Semua</button>
+  <button style="padding:6px 14px;font-size:13px;white-space:nowrap;border-radius:999px;">Antri</button>
+  <button style="padding:6px 14px;font-size:13px;white-space:nowrap;border-radius:999px;">Dikerjakan</button>
+  <button style="padding:6px 14px;font-size:13px;white-space:nowrap;border-radius:999px;">Tunggu part</button>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px;">
+
+  <button style="display:flex;flex-direction:column;gap:8px;padding:14px;text-align:left;border-radius:12px;" onclick="sendPrompt('Buka detail servis order Honda Vario B 1234 XYZ')">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <p style="font-size:14px;font-weight:500;margin:0;">Honda Vario · B 1234 XYZ</p>
+      <span style="background:var(--bg-danger);color:var(--text-danger);font-size:11px;padding:2px 8px;border-radius:999px;">Dikerjakan</span>
+    </div>
+    <p style="font-size:12px;color:var(--text-secondary);margin:0;">Rem belakang bunyi</p>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <i class="ti ti-clock" style="font-size:14px;" aria-hidden="true"></i>
+      <span>Masuk 08:30 · target selesai 11:00</span>
+    </div>
+  </button>
+
+  <button style="display:flex;flex-direction:column;gap:8px;padding:14px;text-align:left;border-radius:12px;" onclick="sendPrompt('Buka detail servis order Yamaha NMAX B 5678 ABC')">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <p style="font-size:14px;font-weight:500;margin:0;">Yamaha NMAX · B 5678 ABC</p>
+      <span style="background:var(--bg-warning);color:var(--text-warning);font-size:11px;padding:2px 8px;border-radius:999px;">Tunggu part</span>
+    </div>
+    <p style="font-size:12px;color:var(--text-secondary);margin:0;">Ganti kampas kopling CVT</p>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <i class="ti ti-clock" style="font-size:14px;" aria-hidden="true"></i>
+      <span>Masuk 09:15 · menunggu part dari gudang</span>
+    </div>
+  </button>
+
+  <button style="display:flex;flex-direction:column;gap:8px;padding:14px;text-align:left;border-radius:12px;" onclick="sendPrompt('Buka detail servis order Honda Beat tanpa plat, pelanggan walk-in')">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <p style="font-size:14px;font-weight:500;margin:0;">Honda Beat hitam · walk-in</p>
+      <span style="background:var(--surface-2);color:var(--text-secondary);font-size:11px;padding:2px 8px;border-radius:999px;">Antri</span>
+    </div>
+    <p style="font-size:12px;color:var(--text-secondary);margin:0;">Servis rutin, ganti oli</p>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <i class="ti ti-clock" style="font-size:14px;" aria-hidden="true"></i>
+      <span>Masuk 10:00 · belum dimulai</span>
+    </div>
+  </button>
+
+  <button style="display:flex;flex-direction:column;gap:8px;padding:14px;text-align:left;border-radius:12px;opacity:0.7;" onclick="sendPrompt('Buka riwayat servis Suzuki Satria yang sudah selesai')">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <p style="font-size:14px;font-weight:500;margin:0;">Suzuki Satria · B 9012 DEF</p>
+      <span style="background:var(--bg-success);color:var(--text-success);font-size:11px;padding:2px 8px;border-radius:999px;">Selesai</span>
+    </div>
+    <p style="font-size:12px;color:var(--text-secondary);margin:0;">Ganti rantai dan gir set</p>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <i class="ti ti-clock" style="font-size:14px;" aria-hidden="true"></i>
+      <span>Selesai 09:45</span>
+    </div>
+  </button>
+
+</div>
+</div>

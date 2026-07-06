@@ -62,7 +62,7 @@
                     </div>
                 @else
                     <table>
-                        <thead><tr><th>No</th><th>Nama</th><th>Telepon</th><th>Email</th><th>Aksi</th></tr></thead>
+                        <thead><tr><th>No</th><th>Nama</th><th>Telepon</th><th>Email</th><th>Tipe</th><th>Aksi</th></tr></thead>
                         <tbody>
                             @foreach ($data as $i => $item)
                             <tr>
@@ -70,10 +70,11 @@
                                 <td>{{ $item->name }}</td>
                                 <td>{{ $item->phone ?? '-' }}</td>
                                 <td>{{ $item->email ?? '-' }}</td>
+                                <td>{{ $item->is_walk_in ? 'Walk-in' : 'Tetap' }}</td>
                                 <td>
                                     <div class="actions">
                                         <a href="{{ route('customers.edit', $item) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
-                                        <form method="POST" action="{{ route('customers.destroy', $item) }}" onsubmit="return confirm('Hapus data ini?')">@csrf @method('DELETE')<button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></form>
+                                        <form method="POST" action="{{ route('customers.destroy', $item) }}" onsubmit="confirmForm(this, 'Hapus data ini?')">@csrf @method('DELETE')<button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></form>
                                     </div>
                                 </td>
                             </tr>

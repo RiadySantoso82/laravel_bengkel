@@ -33,7 +33,7 @@
     @include('layouts.sidebar')
     <main class="main-content">
         <div class="page-header">
-            <h1><i class="fas fa-user-hard-hat"></i> Mekanik</h1>
+            <h1><i class="fas fa-user-cog"></i> Mekanik</h1>
             <a href="{{ route('mechanics.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah</a>
         </div>
         @if (session('success'))
@@ -42,7 +42,22 @@
         <div class="card">
             <div class="card-body">
                 @if ($data->isEmpty())
-                    <div style="text-align:center;padding:60px 20px;color:#94a3b8;"><i class="fas fa-user-hard-hat" style="font-size:48px;margin-bottom:16px;"></i><h3 style="color:#475569;">Belum ada mekanik</h3><p style="margin-bottom:20px;">Tambahkan mekanik baru.</p><a href="{{ route('mechanics.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah Mekanik</a></div>
+                    <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
+                        <i class="fas fa-user-cog" style="font-size:48px;margin-bottom:16px;"></i>
+                        <h3 style="color:#475569;margin-bottom:8px;">Belum ada data mekanik</h3>
+                        <p style="margin-bottom:24px;font-size:14px;">Isi dengan data demo atau input manual.</p>
+                        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;">
+                            <form method="POST" action="{{ route('mechanics.demo') }}" style="display:inline;">
+                                @csrf <input type="hidden" name="count" value="5">
+                                <button class="btn btn-success" style="background:#059669;color:#fff;"><i class="fas fa-database"></i> Demo 5</button>
+                            </form>
+                            <form method="POST" action="{{ route('mechanics.demo') }}" style="display:inline;">
+                                @csrf <input type="hidden" name="count" value="10">
+                                <button class="btn btn-success" style="background:#059669;color:#fff;"><i class="fas fa-database"></i> Demo 10</button>
+                            </form>
+                        </div>
+                        <a href="{{ route('mechanics.create') }}" class="btn btn-primary" style="background:#0f3460;color:#fff;"><i class="fas fa-plus"></i> Input Manual</a>
+                    </div>
                 @else
                     <table>
                         <thead><tr><th>No</th><th>Nama</th><th>Spesialisasi</th><th>Telepon</th><th>Status</th><th>Aksi</th></tr></thead>
@@ -57,7 +72,7 @@
                                 <td>
                                     <div class="actions">
                                         <a href="{{ route('mechanics.edit', $item) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
-                                        <form method="POST" action="{{ route('mechanics.destroy', $item) }}" onsubmit="return confirm('Hapus data ini?')">@csrf @method('DELETE')<button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></form>
+                                        <form method="POST" action="{{ route('mechanics.destroy', $item) }}" onsubmit="confirmForm(this, 'Hapus data ini?')">@csrf @method('DELETE')<button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></form>
                                     </div>
                                 </td>
                             </tr>

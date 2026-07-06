@@ -1,7 +1,7 @@
 erDiagram
     CUSTOMER ||--o{ VEHICLE : memiliki
     CUSTOMER ||--o{ SERVICE_ORDER : membuat
-    VEHICLE ||--o{ SERVICE_ORDER : diservis
+    VEHICLE |o--o{ SERVICE_ORDER : diservis
     SERVICE_ORDER ||--o{ SERVICE_ORDER_DETAIL : berisi
     SERVICE_ORDER }o--|| MECHANIC : dikerjakan_oleh
     SERVICE_ORDER ||--|| INVOICE : menghasilkan
@@ -22,8 +22,9 @@ erDiagram
 
     CUSTOMER {
         int customer_id PK
-        string name
-        string phone
+        boolean is_walk_in
+        string name "nullable jika walk-in"
+        string phone "nullable jika walk-in"
         string email
         string address
         datetime created_at
@@ -42,9 +43,11 @@ erDiagram
 
     SERVICE_ORDER {
         int order_id PK
-        int vehicle_id FK
+        int vehicle_id FK "nullable, kosong jika walk-in"
         int customer_id FK
         int mechanic_id FK
+        string vehicle_plate_manual "diisi manual jika walk-in"
+        string vehicle_info_manual "diisi manual jika walk-in, misal: Honda Beat hitam"
         string complaint
         string status
         datetime created_at

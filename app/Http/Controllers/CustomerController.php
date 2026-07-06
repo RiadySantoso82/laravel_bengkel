@@ -20,8 +20,8 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['name' => 'required|max:255', 'phone' => 'nullable|max:50', 'email' => 'nullable|email|max:255', 'address' => 'nullable']);
-        Customer::create($request->only(['name', 'phone', 'email', 'address']));
+        $request->validate(['name' => 'required|max:255', 'phone' => 'nullable|max:50', 'email' => 'nullable|email|max:255', 'address' => 'nullable', 'is_walk_in' => 'boolean']);
+        Customer::create($request->only(['name', 'phone', 'email', 'address', 'is_walk_in']));
         return redirect()->route('customers.index')->with('success', 'Pelanggan berhasil ditambahkan.');
     }
 
@@ -32,8 +32,8 @@ class CustomerController extends Controller
 
     public function update(Request $request, Customer $customer)
     {
-        $request->validate(['name' => 'required|max:255', 'phone' => 'nullable|max:50', 'email' => 'nullable|email|max:255', 'address' => 'nullable']);
-        $customer->update($request->only(['name', 'phone', 'email', 'address']));
+        $request->validate(['name' => 'required|max:255', 'phone' => 'nullable|max:50', 'email' => 'nullable|email|max:255', 'address' => 'nullable', 'is_walk_in' => 'boolean']);
+        $customer->update($request->only(['name', 'phone', 'email', 'address', 'is_walk_in']));
         return redirect()->route('customers.index')->with('success', 'Pelanggan berhasil diubah.');
     }
 
@@ -49,7 +49,7 @@ class CustomerController extends Controller
         $names = ['Budi Santoso', 'Siti Rahmawati', 'Ahmad Hidayat', 'Dewi Lestari', 'Rudi Hartono', 'Ani Kusuma', 'Doni Prasetyo', 'Rina Wulandari', 'Agus Wijaya', 'Maya Sari', 'Hendra Gunawan', 'Tuti Handayani', 'Eko Saputra', 'Nina Puspita', 'Adi Nugroho', 'Rita Indah', 'Irfan Hakim', 'Dian Permata', 'Yoga Pratama', 'Fani Marlina'];
         $cities = ['Jakarta', 'Bandung', 'Surabaya', 'Semarang', 'Yogyakarta', 'Medan', 'Makassar', 'Denpasar', 'Palembang', 'Malang'];
 
-        $data = [['name' => 'Pelanggan Umum', 'phone' => null, 'email' => null, 'address' => null]];
+        $data = [['name' => 'Pelanggan Umum', 'phone' => null, 'email' => null, 'address' => null, 'is_walk_in' => true]];
         for ($i = 0; $i < min($count - 1, count($names)); $i++) {
             $data[] = [
                 'name' => $names[$i],
@@ -60,7 +60,6 @@ class CustomerController extends Controller
         }
 
         Customer::insert($data);
-        $total = count($data);
-        return redirect()->route('customers.index')->with('success', $total . ' data pelanggan demo berhasil ditambahkan (termasuk Pelanggan Umum).');
+        return redirect()->route('customers.index')->with('success', 'Berhasil menambahkan ' . count($data) . ' data pelanggan (1 Pelanggan Umum + ' . (count($data) - 1) . ' demo).');
     }
 }

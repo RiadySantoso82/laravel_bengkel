@@ -36,13 +36,9 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        if (DB::table('customers')->count() === 0) {
-            DB::table('customers')->insert([
-                'name' => 'Pelanggan Umum',
-                'phone' => null,
-                'email' => null,
-                'address' => null,
-            ]);
+        $mekanikUser = DB::table('users')->where('role', 'mekanik')->first();
+        if ($mekanikUser && DB::table('mechanics')->where('user_id', $mekanikUser->id)->doesntExist()) {
+            DB::table('mechanics')->insert(['name' => $mekanikUser->name, 'user_id' => $mekanikUser->id, 'status' => 'active', 'created_at' => now(), 'updated_at' => now()]);
         }
 
         if (DB::table('sparepart_categories')->count() === 0) {
@@ -82,6 +78,21 @@ class DatabaseSeeder extends Seeder
                 ['name' => 'QRIS', 'is_active' => true],
                 ['name' => 'Kartu Debit', 'is_active' => true],
                 ['name' => 'Kartu Kredit', 'is_active' => true],
+            ]);
+        }
+
+        if (DB::table('service_types')->count() === 0) {
+            DB::table('service_types')->insert([
+                ['name' => 'Ganti Oli Mesin', 'base_price' => 25000, 'estimated_duration' => 30],
+                ['name' => 'Ganti Filter Oli', 'base_price' => 10000, 'estimated_duration' => 15],
+                ['name' => 'Tune Up Ringan', 'base_price' => 75000, 'estimated_duration' => 60],
+                ['name' => 'Servis Rem Depan', 'base_price' => 50000, 'estimated_duration' => 45],
+                ['name' => 'Servis Rem Belakang', 'base_price' => 45000, 'estimated_duration' => 45],
+                ['name' => 'Ganti Ban Luar', 'base_price' => 30000, 'estimated_duration' => 30],
+                ['name' => 'Ganti Kampas Kopling', 'base_price' => 80000, 'estimated_duration' => 90],
+                ['name' => 'Overhaul Mesin', 'base_price' => 500000, 'estimated_duration' => 480],
+                ['name' => 'Servis AC', 'base_price' => 100000, 'estimated_duration' => 120],
+                ['name' => 'Ganti Aki', 'base_price' => 15000, 'estimated_duration' => 15],
             ]);
         }
     }
