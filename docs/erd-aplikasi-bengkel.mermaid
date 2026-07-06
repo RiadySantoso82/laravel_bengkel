@@ -1,0 +1,166 @@
+erDiagram
+    CUSTOMER ||--o{ VEHICLE : memiliki
+    CUSTOMER ||--o{ SERVICE_ORDER : membuat
+    VEHICLE ||--o{ SERVICE_ORDER : diservis
+    SERVICE_ORDER ||--o{ SERVICE_ORDER_DETAIL : berisi
+    SERVICE_ORDER }o--|| MECHANIC : dikerjakan_oleh
+    SERVICE_ORDER ||--|| INVOICE : menghasilkan
+    SERVICE_TYPE ||--o{ SERVICE_ORDER_DETAIL : dipakai_di
+    SPAREPART ||--o{ SERVICE_ORDER_DETAIL : dipakai_di
+    SPAREPART ||--o{ STOCK_MOVEMENT : tercatat_di
+    SERVICE_ORDER ||--o{ STOCK_MOVEMENT : memicu
+    USER ||--o{ SERVICE_ORDER : mengelola
+    SUPPLIER ||--o{ PURCHASE_ORDER : menerima_pesanan
+    PURCHASE_ORDER ||--o{ PURCHASE_ORDER_DETAIL : berisi
+    PURCHASE_ORDER_DETAIL }o--|| SPAREPART : memesan
+    PURCHASE_ORDER ||--o{ STOCK_MOVEMENT : memicu
+    USER ||--o{ PURCHASE_ORDER : membuat
+    SPAREPART_CATEGORY ||--o{ SPAREPART : mengelompokkan
+    UNIT ||--o{ SPAREPART : menyatukan_satuan
+    SERVICE_CATEGORY ||--o{ SERVICE_TYPE : mengelompokkan
+    PAYMENT_METHOD ||--o{ INVOICE : dipakai_di
+
+    CUSTOMER {
+        int customer_id PK
+        string name
+        string phone
+        string email
+        string address
+        datetime created_at
+    }
+
+    VEHICLE {
+        int vehicle_id PK
+        int customer_id FK
+        string plate_number
+        string brand
+        string model
+        int year
+        string chassis_number
+        string engine_number
+    }
+
+    SERVICE_ORDER {
+        int order_id PK
+        int vehicle_id FK
+        int customer_id FK
+        int mechanic_id FK
+        string complaint
+        string status
+        datetime created_at
+        datetime estimated_finish
+        datetime actual_finish
+    }
+
+    SERVICE_ORDER_DETAIL {
+        int detail_id PK
+        int order_id FK
+        string type
+        int item_id FK
+        int qty
+        decimal price
+    }
+
+    SERVICE_TYPE {
+        int service_type_id PK
+        int service_category_id FK
+        string name
+        decimal base_price
+        int estimated_duration
+    }
+
+    SPAREPART {
+        int part_id PK
+        string code
+        string name
+        int category_id FK
+        int unit_id FK
+        decimal buy_price
+        decimal sell_price
+        int stock_qty
+        int min_stock
+    }
+
+    STOCK_MOVEMENT {
+        int movement_id PK
+        int part_id FK
+        string type
+        int qty
+        int reference_id
+        datetime created_at
+    }
+
+    MECHANIC {
+        int mechanic_id PK
+        string name
+        string specialization
+        string phone
+        string status
+    }
+
+    INVOICE {
+        int invoice_id PK
+        int order_id FK
+        int payment_method_id FK
+        decimal total_amount
+        decimal discount
+        string payment_status
+        datetime created_at
+    }
+
+    USER {
+        int user_id PK
+        string username
+        string password_hash
+        string role
+    }
+
+    SUPPLIER {
+        int supplier_id PK
+        string name
+        string phone
+        string address
+        string contact_person
+    }
+
+    PURCHASE_ORDER {
+        int po_id PK
+        int supplier_id FK
+        int user_id FK
+        string status
+        datetime order_date
+        datetime received_date
+        decimal total_amount
+    }
+
+    PURCHASE_ORDER_DETAIL {
+        int po_detail_id PK
+        int po_id FK
+        int part_id FK
+        int qty
+        decimal buy_price
+    }
+
+    SPAREPART_CATEGORY {
+        int category_id PK
+        string name
+        string description
+    }
+
+    UNIT {
+        int unit_id PK
+        string name
+        string symbol
+    }
+
+    SERVICE_CATEGORY {
+        int service_category_id PK
+        string name
+        string description
+    }
+
+    PAYMENT_METHOD {
+        int payment_method_id PK
+        string name
+        boolean is_active
+    }
