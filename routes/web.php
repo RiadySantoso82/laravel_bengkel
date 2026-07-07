@@ -19,6 +19,8 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MechanicDashboardController;
 use App\Http\Controllers\ChecklistItemController;
+use App\Http\Controllers\PartRequestController;
+use App\Http\Controllers\PartReturnController;
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -55,12 +57,18 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::post('checklist-items/demo', [ChecklistItemController::class, 'demo'])->name('checklist-items.demo');
     Route::resource('checklist-items', ChecklistItemController::class);
+    Route::get('part-requests', [PartRequestController::class, 'index'])->name('part-requests.index');
+    Route::post('part-requests/{detail}/fulfill', [PartRequestController::class, 'fulfill'])->name('part-requests.fulfill');
+    Route::get('part-returns', [PartReturnController::class, 'index'])->name('part-returns.index');
+    Route::post('part-returns/{partReturn}/confirm', [PartReturnController::class, 'confirm'])->name('part-returns.confirm');
     Route::prefix('mechanic')->name('mechanic.')->group(function () {
         Route::get('/dashboard', [MechanicDashboardController::class, 'index'])->name('dashboard');
         Route::get('/services', [MechanicDashboardController::class, 'myServices'])->name('services');
         Route::get('/services/{serviceOrder}', [MechanicDashboardController::class, 'detail'])->name('detail');
         Route::post('/services/{serviceOrder}/status', [MechanicDashboardController::class, 'updateStatus'])->name('update-status');
         Route::post('/services/{serviceOrder}/progress', [MechanicDashboardController::class, 'saveProgress'])->name('save-progress');
+        Route::post('/services/{serviceOrder}/request-part', [MechanicDashboardController::class, 'requestPart'])->name('request-part');
+        Route::post('/part-detail/{detail}/return', [MechanicDashboardController::class, 'returnPart'])->name('return-part');
         Route::get('/history', [MechanicDashboardController::class, 'history'])->name('history');
         Route::get('/profile', [MechanicDashboardController::class, 'profile'])->name('profile');
         Route::post('/profile', [MechanicDashboardController::class, 'updateProfile'])->name('update-profile');

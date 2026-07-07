@@ -33,4 +33,9 @@ class ServiceOrder extends Model
     {
         return $this->hasOne(Invoice::class, 'order_id');
     }
+
+    public function partRequests()
+    {
+        return $this->hasMany(PartRequest::class, 'order_id');
+    }
 }

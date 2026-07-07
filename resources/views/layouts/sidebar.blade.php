@@ -25,6 +25,22 @@
 
         <div class="nav-section">Transaksi</div>
         <a href="{{ route('service-orders.index') }}"><i class="fas fa-wrench"></i> Service Order</a>
+        @php $returCount = \App\Models\PartReturn::whereNull('confirmed_at')->count(); @endphp
+        <a href="{{ route('part-returns.index') }}" style="position:relative;">
+            <i class="fas fa-undo-alt"></i> Retur Part
+            @if ($returCount > 0)
+            <span style="margin-left:auto;background:#e94560;color:#fff;font-size:11px;padding:2px 8px;border-radius:999px;font-weight:700;">{{ $returCount }}</span>
+            @endif
+        </a>
+        <a href="{{ route('part-requests.index') }}">
+            <i class="fas fa-boxes"></i> Part Request
+            @if (in_array(Auth::user()->role, ['admin', 'kasir']))
+            @php $prCount = \App\Models\PartRequest::whereIn('status', ['requested', 'partial'])->count(); @endphp
+            @if ($prCount > 0)
+            <span style="margin-left:auto;background:#e94560;color:#fff;font-size:11px;padding:2px 8px;border-radius:999px;font-weight:700;">{{ $prCount }}</span>
+            @endif
+            @endif
+        </a>
         <a href="{{ route('invoices.index') }}"><i class="fas fa-file-invoice-dollar"></i> Invoice</a>
 
         <div class="nav-section">Data Master</div>

@@ -128,6 +128,31 @@
                 @csrf
                 <input type="hidden" name="status" id="actionStatus" value="{{ $serviceOrder->status }}">
 
+                @if ($partRequests->isNotEmpty())
+                <p class="section-title">Part Request</p>
+                <div style="margin-bottom:1.25rem;">
+                    @foreach ($partRequests as $pr)
+                    <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                            <span style="font-size:13px;font-weight:500;">Request #{{ $pr->id }}</span>
+                            <span class="badge badge-{{ $pr->status }}">{{ $pr->status === 'requested' ? 'Menunggu' : ($pr->status === 'partial' ? 'Sebagian' : ($pr->status === 'fulfilled' ? 'Terpenuhi' : 'Diretur')) }}</span>
+                        </div>
+                        @foreach ($pr->details as $d)
+                        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#666;padding:4px 0;">
+                            <span>{{ $d->sparepart->name ?? 'Part #'.$d->part_id }}</span>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span>{{ $d->qty_fulfilled }}/{{ $d->qty_requested }} · <span class="badge badge-{{ $d->status }}" style="font-size:10px;">{{ $d->status === 'pending' ? 'Pending' : ($d->status === 'fulfilled' ? 'Tersedia' : ($d->status === 'partial' ? 'Sebagian' : ($d->status === 'returned' ? 'Diretur' : $d->status))) }}</span></span>
+                                @if (in_array($d->status, ['fulfilled', 'partial']))
+                                <button type="button" onclick="openReturnModal({{ $d->id }}, '{{ $d->sparepart->name ?? 'Part' }}', {{ $d->qty_fulfilled - $d->qty_returned }})" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:14px;padding:0;" title="Kembalikan part"><i class="fas fa-undo"></i></button>
+                                @endif
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+
                 <p class="section-title">Checklist pengecekan</p>
                 <div class="checklist" style="margin-bottom:1.25rem;">
                     @forelse ($masterItems as $item)
@@ -166,7 +191,7 @@
 
                     @if (in_array($serviceOrder->status, ['in_progress', 'waiting_part']))
                     <button type="button" class="action-btn success" onclick="submitWithStatus('{{ $serviceOrder->status }}')"><i class="fas fa-save"></i> Simpan Progress</button>
-                    <button type="button" class="action-btn danger" onclick="submitWithStatus('waiting_part')"><i class="fas fa-box"></i> Request Part</button>
+                    <button type="button" class="action-btn danger" onclick="openPartRequestModal()"><i class="fas fa-box"></i> Request Part</button>
                     <button type="button" class="action-btn primary" onclick="confirmForm(event, 'Yakin ingin menandai servis ini selesai?', 'done')"><i class="fas fa-check-circle"></i> Tandai Selesai</button>
                     @endif
 
@@ -185,6 +210,91 @@
         <button onclick="closeLightbox()" style="position:absolute;top:-40px;right:0;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;">&times;</button>
     </div>
 </div>
+
+<div class="modal-overlay" id="partRequestModal">
+    <div class="modal-box" style="text-align:left;max-width:500px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h3 style="font-size:18px;color:#1a1a2e;margin:0;">Request Part</h3>
+            <button onclick="closePartRequestModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;">&times;</button>
+        </div>
+        <form method="POST" action="{{ route('mechanic.request-part', $serviceOrder) }}">
+            @csrf
+            <div id="partRows">
+                <div class="part-row" style="display:flex;gap:8px;margin-bottom:10px;">
+                    <select name="parts[0][part_id]" class="form-control" style="flex:2;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;" required>
+                        <option value="">-- Pilih Part --</option>
+                        @foreach ($spareparts as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    <input type="number" name="parts[0][qty]" class="form-control" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;" placeholder="Qty" min="1" value="1" required>
+                    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:18px;">&times;</button>
+                </div>
+            </div>
+            <button type="button" class="action-btn primary" style="margin-bottom:12px;padding:8px;" onclick="addPartRow()"><i class="fas fa-plus"></i> Tambah Part</button>
+            <div style="display:flex;gap:8px;">
+                <button type="submit" class="action-btn primary" style="flex:1;">Kirim Request</button>
+                <button type="button" class="action-btn secondary" style="flex:1;background:#e2e8f0;color:#475569;" onclick="closePartRequestModal()">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-overlay" id="returnModal">
+    <div class="modal-box" style="text-align:left;max-width:420px;padding:28px 24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:40px;height:40px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;color:#92400e;font-size:18px;"><i class="fas fa-undo-alt"></i></div>
+                <div>
+                    <h3 style="font-size:16px;color:#1a1a2e;margin:0;font-weight:600;">Kembalikan Part</h3>
+                    <p style="font-size:12px;color:#94a3b8;margin:2px 0 0;">Retur part yang sudah di-fulfill</p>
+                </div>
+            </div>
+            <button onclick="closeReturnModal()" style="width:32px;height:32px;border-radius:50%;border:none;background:#f0f2f5;font-size:16px;cursor:pointer;color:#666;display:flex;align-items:center;justify-content:center;">&times;</button>
+        </div>
+        <form id="returnForm" method="POST" action="">
+            @csrf
+            <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:14px;color:#1a1a2e;font-weight:500;" id="returnPartName"></span>
+            </div>
+
+            <div style="margin-bottom:18px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#475569;margin-bottom:8px;">Jumlah dikembalikan</label>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <button type="button" onclick="let q=document.getElementById('returnQty');if(q.value>1)q.value--" style="width:36px;height:36px;border-radius:8px;border:1px solid #ddd;background:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#475569;">−</button>
+                    <input type="number" id="returnQty" name="qty_returned" min="1" required style="flex:1;text-align:center;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:16px;font-weight:600;outline:none;">
+                    <button type="button" onclick="let q=document.getElementById('returnQty');if(q.value<q.max)q.value++" style="width:36px;height:36px;border-radius:8px;border:1px solid #ddd;background:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#475569;">+</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#475569;margin-bottom:8px;">Alasan retur</label>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label class="reason-option" data-idx="0" onclick="pickReason(0)">
+                        <input type="radio" name="reason" value="tidak_cocok" checked>
+                        <div><strong style="font-size:14px;">Tidak cocok</strong><br><span style="font-size:12px;color:#64748b;">Part tidak sesuai, perlu diganti dengan part lain</span></div>
+                    </label>
+                    <label class="reason-option" data-idx="1" onclick="pickReason(1)">
+                        <input type="radio" name="reason" value="tidak_dipakai">
+                        <div><strong style="font-size:14px;">Tidak dipakai</strong><br><span style="font-size:12px;color:#64748b;">Part tidak jadi digunakan, stok dikembalikan ke gudang</span></div>
+                    </label>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:10px;">
+                <button type="submit" style="flex:1;padding:12px;border-radius:10px;border:none;background:#0f3460;color:#fff;font-size:14px;font-weight:600;cursor:pointer;"><i class="fas fa-paper-plane"></i> Kirim Retur</button>
+                <button type="button" onclick="closeReturnModal()" style="flex:1;padding:12px;border-radius:10px;border:1px solid #ddd;background:#fff;color:#475569;font-size:14px;font-weight:500;cursor:pointer;">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+.modal-box .form-control { width:100%; }
+.part-row select, .part-row input { width:auto; }
+.reason-option { display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all 0.2s; }
+.reason-option:hover { border-color:#0f3460; }
+.reason-option.active { border-color:#0f3460;background:#f8fafc; }
+.reason-option input[type="radio"] { width:16px;height:16px;pointer-events:none; }
+</style>
 
 <script>
 function openLightbox(url) {
@@ -216,5 +326,43 @@ function previewPhotos(input) {
         reader.readAsDataURL(file);
     }
 }
+let partRowIndex = 1;
+function openPartRequestModal() { document.getElementById('partRequestModal').classList.add('active'); }
+function closePartRequestModal() { document.getElementById('partRequestModal').classList.remove('active'); }
+function openReturnModal(detailId, partName, maxQty) {
+    document.getElementById('returnForm').action = '/mechanic/part-detail/' + detailId + '/return';
+    document.getElementById('returnPartName').textContent = '× ' + maxQty + ' ' + partName;
+    document.getElementById('returnQty').max = maxQty;
+    document.getElementById('returnQty').value = maxQty;
+    document.getElementById('returnModal').classList.add('active');
+    pickReason(0);
+}
+function pickReason(idx) {
+    document.querySelectorAll('.reason-option').forEach((l, i) => {
+        l.classList.toggle('active', i === idx);
+        l.querySelector('input[type="radio"]').checked = i === idx;
+    });
+}
+function closeReturnModal() { document.getElementById('returnModal').classList.remove('active'); }
+document.getElementById('returnModal').addEventListener('click', function(e) { if (e.target === this) closeReturnModal(); });
+function addPartRow() {
+    const container = document.getElementById('partRows');
+    const row = document.createElement('div');
+    row.className = 'part-row';
+    row.style.cssText = 'display:flex;gap:8px;margin-bottom:10px;';
+    row.innerHTML = `
+        <select name="parts[${partRowIndex}][part_id]" class="form-control" style="flex:2;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;" required>
+            <option value="">-- Pilih Part --</option>
+            @foreach ($spareparts as $id => $name)
+            <option value="{{ $id }}">{{ $name }}</option>
+            @endforeach
+        </select>
+        <input type="number" name="parts[${partRowIndex}][qty]" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;" placeholder="Qty" min="1" value="1" required>
+        <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:18px;">&times;</button>
+    `;
+    container.appendChild(row);
+    partRowIndex++;
+}
+document.getElementById('partRequestModal').addEventListener('click', function(e) { if (e.target === this) closePartRequestModal(); });
 </script>
 @endsection

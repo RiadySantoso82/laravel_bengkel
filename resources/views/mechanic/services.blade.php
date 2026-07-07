@@ -111,9 +111,10 @@
                                 $statusMap = ['queued'=>'Antri','in_progress'=>'Dikerjakan','waiting_part'=>'Tunggu part','done'=>'Selesai','picked_up'=>'Diambil'];
                                 $statusBadge = $o->status === 'in_progress' ? 'progress' : ($o->status === 'waiting_part' ? 'waiting' : ($o->status === 'done' ? 'done' : ($o->status === 'picked_up' ? 'picked' : 'queued')));
                                 $plate = $o->vehicle->plate_number ?? $o->vehicle_plate_manual ?? '-';
+                                $readyParts = $o->partRequests->sum(fn($pr) => $pr->details->whereIn('status', ['fulfilled','partial'])->count());
                             @endphp
                             <tr data-status="{{ $o->status }}" class="job-row" onclick="window.location='{{ route('mechanic.detail', $o) }}'" style="cursor:pointer;">
-                                <td>SO-{{ str_pad($o->id, 4, '0', STR_PAD_LEFT) }}</td>
+                                <td>SO-{{ str_pad($o->id, 4, '0', STR_PAD_LEFT) }} {!! $readyParts > 0 ? '<span style="background:#059669;color:#fff;font-size:10px;padding:1px 6px;border-radius:999px;margin-left:4px;">Part</span>' : '' !!}</td>
                                 <td>{{ $o->vehicle->brand ?? $o->vehicle_info_manual ?? '-' }} · {{ $plate }}</td>
                                 <td>{{ $o->customer->name ?? '-' }}</td>
                                 <td>{{ Str::limit($o->complaint, 30) }}</td>
@@ -134,6 +135,7 @@
                 $statusClass = $o->status === 'in_progress' ? 'progress' : ($o->status === 'waiting_part' ? 'waiting' : ($o->status === 'done' ? 'done' : ($o->status === 'picked_up' ? 'picked' : 'queued')));
                 $plate = $o->vehicle->plate_number ?? $o->vehicle_plate_manual ?? 'walk-in';
                 $vehicleInfo = $o->vehicle->brand ?? $o->vehicle_info_manual ?? 'Kendaraan';
+                $readyParts = $o->partRequests->sum(fn($pr) => $pr->details->whereIn('status', ['fulfilled','partial'])->count());
                 $timeText = $o->created_at->format('H:i');
                 if ($o->status === 'done' || $o->status === 'picked_up') {
                     $targetText = 'Selesai ' . ($o->actual_finish ? date('H:i', strtotime($o->actual_finish)) : '-');
@@ -147,7 +149,7 @@
             @endphp
             <div class="job-card {{ in_array($o->status, ['done','picked_up']) ? 'completed' : '' }}" data-status="{{ $o->status }}" onclick="window.location='{{ route('mechanic.detail', $o) }}'" style="cursor:pointer;">
                 <div class="top">
-                    <p class="vehicle">{{ $vehicleInfo }} · {{ $plate }}</p>
+                    <p class="vehicle">{{ $vehicleInfo }} · {{ $plate }}{!! $readyParts > 0 ? ' <span style="background:#059669;color:#fff;font-size:10px;padding:1px 6px;border-radius:999px;">Part</span>' : '' !!}</p>
                     <span class="status {{ $statusClass }}">{{ $statusMap[$o->status] }}</span>
                 </div>
                 <p class="complaint">{{ $o->complaint ? Str::limit($o->complaint, 60) : '-' }}</p>

@@ -8,11 +8,14 @@ use App\Models\Sparepart;
 use App\Models\ChecklistItem;
 use App\Models\ServiceOrderChecklist;
 use App\Models\ServiceOrderPhoto;
+use App\Models\PartRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use App\Models\PartRequestDetail;
+use App\Models\PartReturn;
 
 class MechanicDashboardController extends Controller
 {
@@ -47,7 +50,7 @@ class MechanicDashboardController extends Controller
 
     public function myServices()
     {
-        $data = ServiceOrder::with(['customer', 'vehicle'])->where('mechanic_id', $this->mechanicId())->latest()->get();
+        $data = ServiceOrder::with(['customer', 'vehicle', 'partRequests.details'])->where('mechanic_id', $this->mechanicId())->latest()->get();
         return view('mechanic.services', compact('data'));
     }
 
@@ -63,8 +66,9 @@ class MechanicDashboardController extends Controller
         $masterItems = ChecklistItem::where('is_active', true)->orderBy('name')->get();
         $existingChecklist = ServiceOrderChecklist::where('order_id', $serviceOrder->id)->get()->keyBy('checklist_item_id');
         $photos = ServiceOrderPhoto::where('order_id', $serviceOrder->id)->get();
+        $partRequests = PartRequest::with('details.sparepart')->where('order_id', $serviceOrder->id)->latest()->get();
 
-        return view('mechanic.detail', compact('serviceOrder', 'masterItems', 'existingChecklist', 'photos', 'serviceTypes', 'spareparts'));
+        return view('mechanic.detail', compact('serviceOrder', 'masterItems', 'existingChecklist', 'photos', 'partRequests', 'serviceTypes', 'spareparts'));
     }
 
     public function saveProgress(Request $request, ServiceOrder $serviceOrder)
@@ -130,5 +134,72 @@ class MechanicDashboardController extends Controller
         });
 
         return redirect()->route('mechanic.detail', $serviceOrder)->with('success', 'Progress berhasil disimpan.');
+    }
+
+    public function requestPart(Request $request, ServiceOrder $serviceOrder)
+    {
+        if ($serviceOrder->mechanic_id !== $this->mechanicId()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'parts' => 'required|array|min:1',
+            'parts.*.part_id' => 'required|exists:spareparts,id',
+            'parts.*.qty' => 'required|integer|min:1',
+        ]);
+
+        $pr = PartRequest::create([
+            'order_id' => $serviceOrder->id,
+            'mechanic_id' => $this->mechanicId(),
+            'status' => 'requested',
+            'requested_at' => now(),
+        ]);
+
+        foreach ($request->parts as $p) {
+            PartRequestDetail::create([
+                'part_request_id' => $pr->id,
+                'part_id' => $p['part_id'],
+                'qty_requested' => $p['qty'],
+                'qty_fulfilled' => 0,
+                'status' => 'pending',
+            ]);
+        }
+
+        $serviceOrder->update(['status' => 'waiting_part']);
+
+        return redirect()->route('mechanic.detail', $serviceOrder)->with('success', 'Request part berhasil dikirim.');
+    }
+
+    public function returnPart(Request $request, PartRequestDetail $detail)
+    {
+        $order = ServiceOrder::findOrFail($detail->partRequest->order_id);
+        if ($order->mechanic_id !== $this->mechanicId()) abort(403);
+
+        $request->validate([
+            'qty_returned' => 'required|integer|min:1|max:' . ($detail->qty_fulfilled - $detail->qty_returned),
+            'reason' => 'required|in:tidak_cocok,tidak_dipakai',
+        ]);
+
+        $qtyReturn = (int) $request->qty_returned;
+
+        PartReturn::create([
+            'part_request_detail_id' => $detail->id,
+            'mechanic_id' => $this->mechanicId(),
+            'qty_returned' => $qtyReturn,
+            'reason' => $request->reason,
+            'returned_at' => now(),
+        ]);
+
+        $detail->increment('qty_returned', $qtyReturn);
+        $detail->refresh();
+
+        $used = $detail->qty_fulfilled - $detail->qty_returned;
+        if ($used <= 0) {
+            $detail->update(['status' => 'returned']);
+        } elseif ($detail->qty_returned > 0) {
+            $detail->update(['status' => 'partial']);
+        }
+
+        return redirect()->route('mechanic.detail', $order)->with('success', 'Part berhasil diretur, menunggu konfirmasi admin.');
     }
 }

@@ -171,8 +171,10 @@
         }
         document.getElementById('confirmModal').addEventListener('click', function(e) { if (e.target === this) closeConfirmModal(); });
         function confirmForm(form, message) {
-            event.preventDefault();
+            var e = window.event || event;
+            if (e) e.preventDefault();
             showConfirmModal(message, function() { form.submit(); });
+            return false;
         }
     </script>
 

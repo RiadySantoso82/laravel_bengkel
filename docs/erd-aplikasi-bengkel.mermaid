@@ -24,6 +24,16 @@ erDiagram
     MECHANIC ||--o{ SERVICE_ORDER_CHECKLIST : memeriksa
     SERVICE_ORDER ||--o{ SERVICE_ORDER_PHOTO : memiliki
     USER ||--o{ SERVICE_ORDER_PHOTO : mengunggah
+    SERVICE_ORDER ||--o{ PART_REQUEST : memicu
+    MECHANIC ||--o{ PART_REQUEST : meminta
+    PART_REQUEST ||--o{ PART_REQUEST_DETAIL : berisi
+    SPAREPART ||--o{ PART_REQUEST_DETAIL : diminta
+    USER ||--o{ PART_REQUEST_DETAIL : memenuhi
+    PART_REQUEST_DETAIL ||--o{ STOCK_MOVEMENT : memicu
+    PART_REQUEST_DETAIL ||--o{ PART_RETURN : dikembalikan
+    MECHANIC ||--o{ PART_RETURN : mengembalikan
+    USER ||--o{ PART_RETURN : mengonfirmasi
+    PART_RETURN ||--o{ STOCK_MOVEMENT : memicu
 
     CUSTOMER {
         int customer_id PK
@@ -198,4 +208,35 @@ erDiagram
         string type "before atau after"
         string caption
         datetime uploaded_at
+    }
+
+    PART_REQUEST {
+        int part_request_id PK
+        int order_id FK
+        int mechanic_id FK
+        string status "requested, partial, fulfilled"
+        datetime requested_at
+    }
+
+    PART_REQUEST_DETAIL {
+        int detail_id PK
+        int part_request_id FK
+        int part_id FK
+        int qty_requested
+        int qty_fulfilled
+        int qty_returned
+        string status "pending, partial, fulfilled"
+        int fulfilled_by FK
+        datetime fulfilled_at
+    }
+
+    PART_RETURN {
+        int part_return_id PK
+        int part_request_detail_id FK
+        int mechanic_id FK
+        int confirmed_by FK
+        int qty_returned
+        string reason "tidak_cocok atau tidak_dipakai"
+        datetime returned_at
+        datetime confirmed_at
     }
