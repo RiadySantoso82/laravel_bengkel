@@ -37,6 +37,7 @@
         <a href="{{ route('units.index') }}"><i class="fas fa-ruler"></i> Satuan</a>
         <a href="{{ route('service-categories.index') }}"><i class="fas fa-toolbox"></i> Kategori Servis</a>
         <a href="{{ route('payment-methods.index') }}"><i class="fas fa-credit-card"></i> Metode Bayar</a>
+        <a href="{{ route('checklist-items.index') }}"><i class="fas fa-clipboard-list"></i> Checklist Item</a>
 
         <div class="nav-section">Laporan</div>
         <a href="#"><i class="fas fa-chart-bar"></i> Laporan</a>

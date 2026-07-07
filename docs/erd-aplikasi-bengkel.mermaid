@@ -19,6 +19,11 @@ erDiagram
     UNIT ||--o{ SPAREPART : menyatukan_satuan
     SERVICE_CATEGORY ||--o{ SERVICE_TYPE : mengelompokkan
     PAYMENT_METHOD ||--o{ INVOICE : dipakai_di
+    SERVICE_ORDER ||--o{ SERVICE_ORDER_CHECKLIST : memiliki
+    CHECKLIST_ITEM ||--o{ SERVICE_ORDER_CHECKLIST : dipakai_di
+    MECHANIC ||--o{ SERVICE_ORDER_CHECKLIST : memeriksa
+    SERVICE_ORDER ||--o{ SERVICE_ORDER_PHOTO : memiliki
+    USER ||--o{ SERVICE_ORDER_PHOTO : mengunggah
 
     CUSTOMER {
         int customer_id PK
@@ -166,4 +171,31 @@ erDiagram
         int payment_method_id PK
         string name
         boolean is_active
+    }
+
+    CHECKLIST_ITEM {
+        int checklist_item_id PK
+        string name
+        string description
+        boolean is_active
+    }
+
+    SERVICE_ORDER_CHECKLIST {
+        int order_checklist_id PK
+        int order_id FK
+        int checklist_item_id FK
+        int mechanic_id FK
+        boolean is_checked
+        string notes
+        datetime checked_at
+    }
+
+    SERVICE_ORDER_PHOTO {
+        int photo_id PK
+        int order_id FK
+        int user_id FK
+        string photo_url
+        string type "before atau after"
+        string caption
+        datetime uploaded_at
     }

@@ -18,6 +18,7 @@ use App\Http\Controllers\ServiceOrderController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MechanicDashboardController;
+use App\Http\Controllers\ChecklistItemController;
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -52,11 +53,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/invoices/order-detail/{order}', [InvoiceController::class, 'getOrderDetail'])->name('invoices.order-detail');
     Route::resource('invoices', InvoiceController::class);
     Route::resource('users', UserController::class);
+    Route::post('checklist-items/demo', [ChecklistItemController::class, 'demo'])->name('checklist-items.demo');
+    Route::resource('checklist-items', ChecklistItemController::class);
     Route::prefix('mechanic')->name('mechanic.')->group(function () {
         Route::get('/dashboard', [MechanicDashboardController::class, 'index'])->name('dashboard');
         Route::get('/services', [MechanicDashboardController::class, 'myServices'])->name('services');
         Route::get('/services/{serviceOrder}', [MechanicDashboardController::class, 'detail'])->name('detail');
         Route::post('/services/{serviceOrder}/status', [MechanicDashboardController::class, 'updateStatus'])->name('update-status');
+        Route::post('/services/{serviceOrder}/progress', [MechanicDashboardController::class, 'saveProgress'])->name('save-progress');
         Route::get('/history', [MechanicDashboardController::class, 'history'])->name('history');
         Route::get('/profile', [MechanicDashboardController::class, 'profile'])->name('profile');
         Route::post('/profile', [MechanicDashboardController::class, 'updateProfile'])->name('update-profile');
