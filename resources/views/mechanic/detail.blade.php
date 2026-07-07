@@ -191,6 +191,9 @@
 
                     @if (in_array($serviceOrder->status, ['in_progress', 'waiting_part']))
                     <button type="button" class="action-btn success" onclick="submitWithStatus('{{ $serviceOrder->status }}')"><i class="fas fa-save"></i> Simpan Progress</button>
+                    @if ($serviceOrder->status === 'waiting_part' && $partRequests->sum(fn($pr) => $pr->details->whereIn('status', ['fulfilled','partial'])->count()) > 0)
+                    <button type="button" class="action-btn primary" onclick="submitWithStatus('in_progress')" style="background:#059669;"><i class="fas fa-check-double"></i> Konfirmasi Part Sesuai</button>
+                    @endif
                     <button type="button" class="action-btn danger" onclick="openPartRequestModal()"><i class="fas fa-box"></i> Request Part</button>
                     <button type="button" class="action-btn primary" onclick="confirmForm(event, 'Yakin ingin menandai servis ini selesai?', 'done')"><i class="fas fa-check-circle"></i> Tandai Selesai</button>
                     @endif
