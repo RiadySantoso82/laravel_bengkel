@@ -86,7 +86,7 @@
     <main class="main-content">
         <div class="detail-container">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
-                <a href="{{ route('mechanic.services') }}" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+                <a href="{{ request('from') === 'history' ? route('mechanic.history') : route('mechanic.services') }}" class="back-btn"><i class="fas fa-arrow-left"></i></a>
                 <p style="font-weight:500;font-size:15px;margin:0;">Detail servis order</p>
             </div>
 
@@ -156,14 +156,14 @@
                 <p class="section-title">Checklist pengecekan</p>
                 <div class="checklist" style="margin-bottom:1.25rem;">
                     @forelse ($masterItems as $item)
-                    @php $existing = $existingChecklist->get($item->id); $isChecked = $existing && $existing->is_checked; @endphp
-                    <div class="checklist-item">
-                        <input type="checkbox" {{ $isChecked ? 'checked' : '' }} onchange="document.getElementById('chk_{{ $item->id }}').value = this.checked ? '1' : '0'">
+                    @php $existing = $existingChecklist->get($item->id); $isChecked = $existing && $existing->is_checked; $disabled = in_array($serviceOrder->status, ['done', 'picked_up']); @endphp
+                    <div class="checklist-item" style="{{ $disabled ? 'opacity:0.7;' : '' }}">
+                        <input type="checkbox" {{ $isChecked ? 'checked' : '' }} {{ $disabled ? 'disabled' : '' }} onchange="document.getElementById('chk_{{ $item->id }}').value = this.checked ? '1' : '0'">
                         <input type="hidden" name="checklist[{{ $item->id }}][checked]" id="chk_{{ $item->id }}" value="{{ $isChecked ? '1' : '0' }}">
                         <input type="hidden" name="checklist[{{ $item->id }}][id]" value="{{ $item->id }}">
                         <div class="item-body">
                             <div class="item-name">{{ $item->name }}</div>
-                            <input type="text" name="checklist[{{ $item->id }}][notes]" class="item-notes" placeholder="Catatan (opsional)" value="{{ $existing->notes ?? '' }}">
+                            <input type="text" name="checklist[{{ $item->id }}][notes]" class="item-notes" placeholder="Catatan (opsional)" value="{{ $existing->notes ?? '' }}" {{ $disabled ? 'readonly' : '' }}>
                         </div>
                     </div>
                     @empty
@@ -176,10 +176,12 @@
                     @foreach ($photos as $photo)
                     <div class="photo-box" onclick="openLightbox('{{ $photo->photo_url }}')" style="cursor:pointer;"><img src="{{ $photo->photo_url }}" alt="{{ $photo->caption ?? '' }}"></div>
                     @endforeach
+                    @if (!in_array($serviceOrder->status, ['done', 'picked_up']))
                     <div class="photo-add">
                         <i class="fas fa-camera"></i>
                         <input type="file" name="photos[]" accept="image/*" multiple onchange="previewPhotos(this)">
                     </div>
+                    @endif
                 </div>
 
                 <div id="photoPreview" class="photo-area"></div>
@@ -195,7 +197,7 @@
                     <button type="button" class="action-btn primary" onclick="submitWithStatus('in_progress')" style="background:#059669;"><i class="fas fa-check-double"></i> Konfirmasi Part Sesuai</button>
                     @endif
                     <button type="button" class="action-btn danger" onclick="openPartRequestModal()"><i class="fas fa-box"></i> Request Part</button>
-                    <button type="button" class="action-btn primary" onclick="confirmForm(event, 'Yakin ingin menandai servis ini selesai?', 'done')"><i class="fas fa-check-circle"></i> Tandai Selesai</button>
+                    <button type="button" class="action-btn primary" onclick="confirmDone()"><i class="fas fa-check-circle"></i> Tandai Selesai</button>
                     @endif
 
                     @if (in_array($serviceOrder->status, ['done', 'picked_up']))
@@ -311,9 +313,8 @@ function submitWithStatus(status) {
     document.getElementById('actionStatus').value = status;
     document.getElementById('progressForm').submit();
 }
-function confirmForm(event, message, status) {
-    event.preventDefault();
-    showConfirmModal(message, function() { submitWithStatus(status); });
+function confirmDone() {
+    showConfirmModal('Yakin ingin menandai servis ini selesai?', function() { submitWithStatus('done'); });
 }
 function previewPhotos(input) {
     const container = document.getElementById('photoPreview');

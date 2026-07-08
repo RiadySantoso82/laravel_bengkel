@@ -45,12 +45,66 @@ class MechanicDashboardController extends Controller
         $mid = $this->mechanicId();
         $activeCount = ServiceOrder::where('mechanic_id', $mid)->whereIn('status', ['queued', 'in_progress', 'waiting_part'])->count();
         $completedCount = ServiceOrder::where('mechanic_id', $mid)->whereIn('status', ['done', 'picked_up'])->count();
-        return view('mechanic.dashboard', compact('activeCount', 'completedCount'));
+
+        $chartDays = [];
+        $chartCounts = [];
+        $heatmap = [];
+        $slots = ['Sebelum 08:00'];
+        for ($h = 8; $h <= 20; $h += 2) {
+            $slots[] = str_pad($h, 2, '0', STR_PAD_LEFT) . ':00-' . str_pad($h + 2, 2, '0', STR_PAD_LEFT) . ':00';
+        }
+        $slots[] = '22:00+';
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $dayLabel = date('d/m', strtotime($date));
+
+            $count = ServiceOrder::where('mechanic_id', $mid)
+                ->whereIn('status', ['done', 'picked_up'])
+                ->whereDate('actual_finish', $date)
+                ->count();
+            $chartDays[] = $dayLabel;
+            $chartCounts[] = $count;
+
+            $orders = ServiceOrder::where('mechanic_id', $mid)
+                ->whereIn('status', ['done', 'picked_up'])
+                ->whereNotNull('actual_finish')
+                ->whereDate('actual_finish', $date)
+                ->pluck('actual_finish');
+
+            $slotData = [];
+            $cntBefore8 = 0;
+            foreach ($orders as $finish) {
+                $hour = (int) date('G', strtotime($finish));
+                if ($hour < 8) { $cntBefore8++; continue; }
+                if ($hour >= 22) { continue; }
+                for ($h = 8; $h <= 20; $h += 2) {
+                    if ($hour >= $h && $hour < $h + 2) {
+                        $slotData[$h] = ($slotData[$h] ?? 0) + 1;
+                        break;
+                    }
+                }
+            }
+            $cntAfter22 = 0;
+            foreach ($orders as $finish) {
+                $hour = (int) date('G', strtotime($finish));
+                if ($hour >= 22) $cntAfter22++;
+            }
+            $row = [$cntBefore8];
+            for ($h = 8; $h <= 20; $h += 2) {
+                $row[] = $slotData[$h] ?? 0;
+            }
+            $row[] = $cntAfter22;
+            $slotData = $row;
+            $heatmap[] = $slotData;
+        }
+
+        return view('mechanic.dashboard', compact('activeCount', 'completedCount', 'chartDays', 'chartCounts', 'heatmap', 'slots'));
     }
 
     public function myServices()
     {
-        $data = ServiceOrder::with(['customer', 'vehicle', 'partRequests.details'])->where('mechanic_id', $this->mechanicId())->latest()->get();
+        $data = ServiceOrder::with(['customer', 'vehicle', 'partRequests.details'])->where('mechanic_id', $this->mechanicId())->latest()->paginate(20);
         return view('mechanic.services', compact('data'));
     }
 
@@ -69,6 +123,41 @@ class MechanicDashboardController extends Controller
         $partRequests = PartRequest::with('details.sparepart')->where('order_id', $serviceOrder->id)->latest()->get();
 
         return view('mechanic.detail', compact('serviceOrder', 'masterItems', 'existingChecklist', 'photos', 'partRequests', 'serviceTypes', 'spareparts'));
+    }
+
+    public function history(Request $request)
+    {
+        $from = $request->date_from;
+        $to = $request->date_to;
+
+        if ($from && $to) {
+            $d1 = min($from, $to);
+            $d2 = max($from, $to);
+            if (strtotime($d2) - strtotime($d1) > 31 * 86400) {
+                $d2 = date('Y-m-d', strtotime($d1 . ' +31 days'));
+            }
+        } elseif ($from) {
+            $d1 = $from;
+            $d2 = date('Y-m-d', strtotime($d1 . ' +31 days'));
+        } elseif ($to) {
+            $d2 = $to;
+            $d1 = date('Y-m-d', strtotime($d2 . ' -31 days'));
+        } else {
+            $d1 = date('Y-m-d', strtotime('-30 days'));
+            $d2 = date('Y-m-d');
+        }
+
+        $query = ServiceOrder::with(['customer', 'vehicle'])->where('mechanic_id', $this->mechanicId())->whereIn('status', ['done', 'picked_up']);
+
+        if ($d1) {
+            $query->whereDate('actual_finish', '>=', $d1);
+        }
+        if ($d2) {
+            $query->whereDate('actual_finish', '<=', $d2);
+        }
+
+        $data = $query->latest('actual_finish')->paginate(20)->appends(request()->only(['date_from', 'date_to']));
+        return view('mechanic.history', compact('data', 'd1', 'd2'));
     }
 
     public function saveProgress(Request $request, ServiceOrder $serviceOrder)
@@ -168,6 +257,22 @@ class MechanicDashboardController extends Controller
         $serviceOrder->update(['status' => 'waiting_part']);
 
         return redirect()->route('mechanic.detail', $serviceOrder)->with('success', 'Request part berhasil dikirim.');
+    }
+
+    public function profile()
+    {
+        $mechanic = $this->getMechanic();
+        return view('mechanic.profile', compact('mechanic'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $mechanic = $this->getMechanic();
+        $request->validate(['phone' => 'nullable|max:50', 'specialization' => 'nullable|max:255']);
+        if ($mechanic) {
+            $mechanic->update($request->only(['phone', 'specialization']));
+        }
+        return redirect()->route('mechanic.profile')->with('success', 'Profil berhasil diupdate.');
     }
 
     public function returnPart(Request $request, PartRequestDetail $detail)

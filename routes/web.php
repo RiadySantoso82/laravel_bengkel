@@ -21,6 +21,7 @@ use App\Http\Controllers\MechanicDashboardController;
 use App\Http\Controllers\ChecklistItemController;
 use App\Http\Controllers\PartRequestController;
 use App\Http\Controllers\PartReturnController;
+use App\Http\Controllers\ReportController;
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -61,6 +62,8 @@ Route::middleware('auth')->group(function () {
     Route::post('part-requests/{detail}/fulfill', [PartRequestController::class, 'fulfill'])->name('part-requests.fulfill');
     Route::get('part-returns', [PartReturnController::class, 'index'])->name('part-returns.index');
     Route::post('part-returns/{partReturn}/confirm', [PartReturnController::class, 'confirm'])->name('part-returns.confirm');
+    Route::get('reports/movements', [ReportController::class, 'movements'])->name('reports.movements');
+    Route::get('reports/stock', [ReportController::class, 'stock'])->name('reports.stock');
     Route::prefix('mechanic')->name('mechanic.')->group(function () {
         Route::get('/dashboard', [MechanicDashboardController::class, 'index'])->name('dashboard');
         Route::get('/services', [MechanicDashboardController::class, 'myServices'])->name('services');

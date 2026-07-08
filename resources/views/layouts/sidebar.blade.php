@@ -56,7 +56,8 @@
         <a href="{{ route('checklist-items.index') }}"><i class="fas fa-clipboard-list"></i> Checklist Item</a>
 
         <div class="nav-section">Laporan</div>
-        <a href="#"><i class="fas fa-chart-bar"></i> Laporan</a>
+        <a href="{{ route('reports.stock') }}"><i class="fas fa-boxes"></i> Sisa Stok</a>
+        <a href="{{ route('reports.movements') }}"><i class="fas fa-exchange-alt"></i> Stock Movement</a>
 
         @if (Auth::user()->role === 'admin')
         <div class="nav-section">Sistem</div>

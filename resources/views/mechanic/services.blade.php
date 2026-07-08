@@ -63,6 +63,10 @@
     .job-card .complaint { font-size: 12px; color: var(--text-secondary); margin: 0; }
     .job-card .time { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
     .job-card select { font-size: 12px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 6px; outline: none; background: #fff; width: 100%; }
+    .pagination-wrap { max-width:380px; margin: 16px auto 0; }
+    .pagination-wrap nav { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
+    .pagination-wrap a, .pagination-wrap span { padding: 6px 12px; border-radius: 6px; font-size: 13px; text-decoration: none; color: #475569; background: #fff; border: 1px solid #e2e8f0; }
+    .pagination-wrap .active { background: #0f3460; color: #fff; border-color: #0f3460; }
 
     @media (max-width: 768px) {
         .table-desktop { display: none; }
@@ -161,6 +165,10 @@
                 <h3 style="color:#475569;font-size:16px;font-weight:500;">Belum ada servis ditugaskan</h3>
             </div>
             @endforelse
+        </div>
+
+        <div class="pagination-wrap">
+            {{ $data->links() }}
         </div>
     </main>
 </div>
