@@ -27,8 +27,11 @@ class Sparepart extends Model
 
     public function getStockQtyAttribute()
     {
-        $in = $this->movements()->where('movement_type', 'in')->sum('qty');
-        $out = $this->movements()->where('movement_type', 'out')->sum('qty');
-        return $in - $out;
+        return $this->batches()->sum('qty_remaining');
+    }
+
+    public function batches()
+    {
+        return $this->hasMany(StockBatch::class, 'part_id');
     }
 }

@@ -18,7 +18,10 @@ erDiagram
     SPAREPART_CATEGORY ||--o{ SPAREPART : mengelompokkan
     UNIT ||--o{ SPAREPART : menyatukan_satuan
     SERVICE_CATEGORY ||--o{ SERVICE_TYPE : mengelompokkan
-    PAYMENT_METHOD ||--o{ INVOICE : dipakai_di
+    PAYMENT_METHOD ||--o{ PAYMENT_TRANSACTION : dipakai_di
+    SALES_ORDER ||--o{ PAYMENT_TRANSACTION : dibayar_melalui
+    INVOICE ||--o{ PAYMENT_TRANSACTION : dibayar_melalui
+    USER ||--o{ PAYMENT_TRANSACTION : mencatat
     SERVICE_ORDER ||--o{ SERVICE_ORDER_CHECKLIST : memiliki
     CHECKLIST_ITEM ||--o{ SERVICE_ORDER_CHECKLIST : dipakai_di
     MECHANIC ||--o{ SERVICE_ORDER_CHECKLIST : memeriksa
@@ -38,6 +41,15 @@ erDiagram
     USER ||--o{ STOCK_ADJUSTMENT : melakukan
     STOCK_ADJUSTMENT ||--o{ STOCK_MOVEMENT : memicu
     USER ||--o{ STOCK_MOVEMENT : mencatat
+    CUSTOMER ||--o{ SALES_ORDER : membeli
+    USER ||--o{ SALES_ORDER : melayani
+    SALES_ORDER ||--o{ SALES_ORDER_DETAIL : berisi
+    SPAREPART ||--o{ SALES_ORDER_DETAIL : dijual
+    SALES_ORDER_DETAIL ||--o{ STOCK_MOVEMENT : memicu
+    SPAREPART ||--o{ STOCK_BATCH : memiliki_batch
+    STOCK_MOVEMENT |o--o| STOCK_BATCH : membentuk
+    STOCK_BATCH ||--o{ STOCK_MOVEMENT_ALLOCATION : dialokasikan_dari
+    STOCK_MOVEMENT ||--o{ STOCK_MOVEMENT_ALLOCATION : mengalokasikan
 
     CUSTOMER {
         int customer_id PK
@@ -106,7 +118,7 @@ erDiagram
         int movement_id PK
         int part_id FK
         string movement_type "in atau out"
-        string source_type "purchase_order, part_request, part_return, stock_adjustment, service_order_detail"
+        string source_type "purchase_order, part_request, part_return, stock_adjustment, service_order_detail, sales_order_detail"
         int source_id "merujuk ke tabel sesuai source_type"
         int qty
         date transaction_date "tanggal transaksi sebenarnya"
@@ -125,7 +137,6 @@ erDiagram
     INVOICE {
         int invoice_id PK
         int order_id FK
-        int payment_method_id FK
         decimal total_amount
         decimal discount
         string payment_status
@@ -256,4 +267,58 @@ erDiagram
         string notes
         date transaction_date
         datetime created_at
+    }
+
+    SALES_ORDER {
+        int sales_order_id PK
+        int customer_id FK "nullable, bisa walk-in"
+        int user_id FK
+        decimal total_amount
+        decimal discount
+        string payment_status
+        datetime created_at
+    }
+
+    SALES_ORDER_DETAIL {
+        int sales_detail_id PK
+        int sales_order_id FK
+        int part_id FK
+        int qty
+        decimal sell_price
+        decimal cost_price "HPP dari FIFO, terisi setelah alokasi batch"
+    }
+
+    STOCK_BATCH {
+        int batch_id PK
+        int part_id FK
+        int qty_in "jumlah masuk awal batch ini"
+        int qty_remaining "sisa yang belum terpakai"
+        decimal buy_price "harga beli batch ini"
+        date received_date "dipakai untuk urutan FIFO"
+        datetime created_at
+    }
+
+    STOCK_MOVEMENT_ALLOCATION {
+        int allocation_id PK
+        int movement_id FK "stock_movement tipe out"
+        int batch_id FK "batch yang dipakai, FIFO"
+        int qty_taken
+        decimal cost_price "harga beli dari batch ini, untuk HPP"
+    }
+
+    PAYMENT_TRANSACTION {
+        int payment_transaction_id PK
+        string reference_type "sales_order atau invoice"
+        int reference_id "merujuk ke SALES_ORDER atau INVOICE sesuai reference_type"
+        int payment_method_id FK
+        int created_by FK
+        decimal amount "jumlah dibayar lewat metode ini"
+        decimal amount_received "khusus tunai"
+        decimal change_amount "khusus tunai"
+        string card_type "debit/kredit, khusus kartu"
+        string card_last4 "4 digit terakhir kartu, khusus kartu"
+        string issuing_bank "bank penerbit kartu / bank tujuan transfer"
+        string reference_number "kode approval EDC / no ref QRIS / no ref transfer"
+        string proof_url "bukti transfer, opsional"
+        datetime paid_at
     }

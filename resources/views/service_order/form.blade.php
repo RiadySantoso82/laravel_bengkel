@@ -150,12 +150,25 @@
 </div>
 @endsection
 
+<div class="modal-overlay" id="partSearchModal">
+    <div class="modal-box" style="text-align:left;max-width:480px;height:80vh;display:flex;flex-direction:column;padding:16px 20px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-shrink:0;">
+            <button type="button" onclick="closePartSearch()" style="width:32px;height:32px;border-radius:50%;border:none;background:var(--surface-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&larr;</button>
+            <p style="font-weight:500;font-size:15px;margin:0;">Pilih sparepart</p>
+        </div>
+        <div style="position:relative;margin-bottom:12px;flex-shrink:0;">
+            <i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text-muted);"></i>
+            <input type="text" id="partSearchInput" placeholder="Cari kode atau nama sparepart..." style="width:100%;padding:10px 12px 10px 36px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;" onkeyup="searchParts()">
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;flex-shrink:0;" id="partResultCount"></div>
+        <div id="partSearchResults" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 const serviceTypes = @json($serviceTypes ?? []);
-const spareparts = @json($spareparts ?? []);
-
-let itemIndex = 0;
+let partSearchData = [], pendingPartTarget = null, itemIndex = 0;
 
 function loadVehicles(customerId) {
     fetch('{{ route("service-orders.vehicles") }}?customer_id=' + customerId)
@@ -169,57 +182,122 @@ function loadVehicles(customerId) {
         });
 }
 
+function openPartSearch(targetIdx) {
+    pendingPartTarget = targetIdx;
+    document.getElementById('partSearchModal').classList.add('active');
+    document.getElementById('partSearchInput').value = '';
+    searchParts();
+}
+function closePartSearch() { document.getElementById('partSearchModal').classList.remove('active'); pendingPartTarget = null; }
+
+function searchParts() {
+    const q = document.getElementById('partSearchInput').value;
+    fetch('{{ route("sales-orders.search-part") }}?q=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(data => {
+            partSearchData = data.results;
+            document.getElementById('partResultCount').textContent = partSearchData.length + ' hasil';
+            const list = document.getElementById('partSearchResults');
+            list.innerHTML = partSearchData.map((r, idx) => {
+                const stock = r.stock_qty || 0;
+                const sellPrice = r.sell_price || 0;
+                return '<div class="search-item" data-idx="' + idx + '" style="cursor:pointer;">' +
+                    '<div style="flex:1;"><p style="font-size:14px;font-weight:500;margin:0;color:#1a1a2e;">' + r.name + '</p>' +
+                    '<p style="font-size:12px;color:var(--text-secondary);margin:0;">' + (r.code || '') + ' · ' + (r.category || '') + ' · ' + (r.unit || '') + ' · Stok: ' + stock + '</p></div>' +
+                    '<div style="text-align:right;"><p style="font-size:11px;color:var(--text-secondary);margin:0;">Harga</p><p style="font-size:16px;font-weight:500;margin:0;">Rp ' + (sellPrice ? Number(sellPrice).toLocaleString('id-ID') : '0') + '</p></div></div>';
+            }).join('');
+            if (!partSearchData.length) list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ditemukan</div>';
+        });
+}
+
+document.getElementById('partSearchResults').addEventListener('click', function(e) {
+    const item = e.target.closest('.search-item');
+    if (!item) return;
+    const idx = parseInt(item.dataset.idx);
+    const r = partSearchData[idx];
+    if (!r) return;
+    if (pendingPartTarget !== null) {
+        const row = document.getElementById('item-' + pendingPartTarget);
+        if (row) {
+            const idInput = row.querySelector('input[name$="[item_id]"]');
+            const priceInput = row.querySelector('input[name$="[price]"]');
+            const nameSpan = row.querySelector('.part-name');
+            if (idInput) idInput.value = r.id;
+            if (priceInput) priceInput.value = r.sell_price || 0;
+            if (nameSpan) nameSpan.textContent = r.name + ' (' + (r.code || '') + ')';
+            calcRow(pendingPartTarget);
+        }
+    }
+    closePartSearch();
+});
+
 function addItem(data) {
     data = data || { type: 'jasa', item_id: '', qty: 1, price: 0 };
     const i = itemIndex++;
+    const isPart = data.type === 'part';
     const tr = document.createElement('tr');
     tr.id = 'item-' + i;
     tr.innerHTML = `
         <td>
             <select name="items[` + i + `][type]" class="form-control" onchange="updateItemOptions(` + i + `)" style="font-size:13px;padding:6px 8px;">
                 <option value="jasa" ` + (data.type === 'jasa' ? 'selected' : '') + `>Jasa</option>
-                <option value="part" ` + (data.type === 'part' ? 'selected' : '') + `>Part</option>
+                <option value="part" ` + (isPart ? 'selected' : '') + `>Part</option>
             </select>
         </td>
         <td>
-            <select name="items[` + i + `][item_id]" class="form-control" onchange="updateItemPrice(` + i + `)" style="font-size:13px;padding:6px 8px;">
-                <option value="">-- Pilih --</option>
+            <input type="hidden" name="items[` + i + `][item_id]" value="` + (data.item_id || '') + `">
+            <div style="display:flex;gap:4px;align-items:center;">
+                <span class="part-name" style="font-size:13px;flex:1;color:` + (data.item_id ? '#1a1a2e' : '#94a3b8') + `;">` + (data.item_id ? '(Selected)' : (isPart ? 'Klik cari part' : '')) + `</span>
+                <button type="button" class="btn btn-sm btn-primary" onclick="openPartSearch(` + i + `)" style="font-size:11px;padding:4px 8px;display:` + (isPart ? '' : 'none') + `;"><i class="fas fa-search"></i> Cari</button>
+            </div>
+            <select name="_jasa_select" class="form-control" onchange="selectJasa(` + i + `, this)" style="font-size:13px;padding:6px 8px;display:` + (isPart ? 'none' : '') + `;">
+                <option value="">-- Pilih Jasa --</option>
+                ` + serviceTypes.map(j => '<option value="' + j.id + '" data-price="' + (j.base_price || 0) + '">' + j.name + '</option>').join('') + `
             </select>
         </td>
         <td><input type="number" name="items[` + i + `][qty]" value="` + data.qty + `" min="1" class="form-control" style="font-size:13px;padding:6px 8px;" onchange="calcRow(` + i + `)" onkeyup="calcRow(` + i + `)"></td>
         <td><input type="number" name="items[` + i + `][price]" value="` + data.price + `" min="0" class="form-control" style="font-size:13px;padding:6px 8px;" onchange="calcRow(` + i + `)" onkeyup="calcRow(` + i + `)"></td>
         <td class="item-total" id="subtotal-` + i + `">` + (data.qty * data.price).toLocaleString() + `</td>
-        <td><button type="button" class="btn btn-danger btn-sm" onclick="document.getElementById('item-` + i + `').remove(); calcGrandTotal();"><i class="fas fa-times"></i></button></td>
+        <td><button type="button" class="btn btn-danger btn-sm" onclick="document.getElementById('item-' + i).remove(); calcGrandTotal();"><i class="fas fa-times"></i></button></td>
     `;
     document.getElementById('items-body').appendChild(tr);
-    updateItemOptions(i, data.type, data.item_id);
+    if (data.item_id && isPart) {
+        tr.querySelector('.part-name').textContent = '(Selected #' + data.item_id + ')';
+    }
+    if (data.item_id && !isPart) {
+        const sel = tr.querySelector('select[name="_jasa_select"]');
+        if (sel) sel.value = data.item_id;
+    }
     calcGrandTotal();
 }
 
-function updateItemOptions(i, forceType, forceItem) {
+function updateItemOptions(i) {
     const row = document.getElementById('item-' + i);
     const typeSel = row.querySelector('select[name$="[type]"]');
-    const itemSel = row.querySelector('select[name$="[item_id]"]');
-    const type = forceType || typeSel.value;
-    const items = type === 'jasa' ? serviceTypes : spareparts;
-    const label = type === 'jasa' ? 'Nama Jasa' : 'Nama Part';
-    itemSel.innerHTML = '<option value="">-- ' + label + ' --</option>';
-    items.forEach(it => {
-        const name = type === 'jasa' ? it.name : (it.name + ' (' + it.code + ')');
-        itemSel.innerHTML += '<option value="' + it.id + '" data-price="' + (type === 'jasa' ? it.base_price : it.sell_price) + '">' + name + '</option>';
-    });
-    if (forceItem) { itemSel.value = forceItem; }
-    updateItemPrice(i);
+    const type = typeSel.value;
+    const btn = row.querySelector('.btn-primary');
+    const jasaSel = row.querySelector('select[name="_jasa_select"]');
+    const nameSpan = row.querySelector('.part-name');
+    const idInput = row.querySelector('input[name$="[item_id]"]');
+    if (type === 'part') {
+        if (btn) btn.style.display = '';
+        if (jasaSel) jasaSel.style.display = 'none';
+        if (nameSpan) { nameSpan.style.display = ''; nameSpan.textContent = '(Klik cari part)'; }
+        if (idInput) idInput.value = '';
+    } else {
+        if (btn) btn.style.display = 'none';
+        if (jasaSel) jasaSel.style.display = '';
+        if (nameSpan) nameSpan.style.display = 'none';
+    }
 }
 
-function updateItemPrice(i) {
+function selectJasa(i, sel) {
     const row = document.getElementById('item-' + i);
-    const itemSel = row.querySelector('select[name$="[item_id]"]');
+    const idInput = row.querySelector('input[name$="[item_id]"]');
     const priceInput = row.querySelector('input[name$="[price]"]');
-    const selected = itemSel.options[itemSel.selectedIndex];
-    if (selected && selected.dataset.price) {
-        priceInput.value = selected.dataset.price;
-    }
+    const opt = sel.options[sel.selectedIndex];
+    if (idInput) idInput.value = sel.value;
+    if (priceInput && opt && opt.dataset.price) priceInput.value = opt.dataset.price;
     calcRow(i);
 }
 
@@ -283,5 +361,11 @@ document.addEventListener('DOMContentLoaded', function() {
         addItem();
     @endif
 });
+
+document.getElementById('partSearchModal').addEventListener('click', function(e) { if (e.target === this) closePartSearch(); });
 </script>
+<style>
+.search-item { display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;transition:all 0.2s; }
+.search-item:hover { background:var(--surface-2); }
+</style>
 @endpush

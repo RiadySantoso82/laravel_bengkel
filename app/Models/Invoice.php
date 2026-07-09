@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
-    protected $fillable = ['order_id', 'total_amount', 'discount', 'payment_method_id', 'payment_status'];
+    protected $fillable = ['order_id', 'total_amount', 'discount', 'payment_status'];
     protected $table = 'invoices';
 
     public function order()
@@ -14,8 +14,8 @@ class Invoice extends Model
         return $this->belongsTo(ServiceOrder::class, 'order_id');
     }
 
-    public function paymentMethod()
+    public function payments()
     {
-        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
+        return $this->morphMany(PaymentTransaction::class, 'reference', 'reference_type', 'reference_id');
     }
 }

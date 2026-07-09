@@ -36,11 +36,6 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $mekanikUser = DB::table('users')->where('role', 'mekanik')->first();
-        if ($mekanikUser && DB::table('mechanics')->where('user_id', $mekanikUser->id)->doesntExist()) {
-            DB::table('mechanics')->insert(['name' => $mekanikUser->name, 'user_id' => $mekanikUser->id, 'status' => 'active', 'created_at' => now(), 'updated_at' => now()]);
-        }
-
         if (DB::table('sparepart_categories')->count() === 0) {
             DB::table('sparepart_categories')->insert([
                 ['name' => 'Oli & Pelumas', 'description' => 'Oli mesin, oli gardan, pelumas'],

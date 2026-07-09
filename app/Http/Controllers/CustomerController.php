@@ -56,6 +56,7 @@ class CustomerController extends Controller
                 'phone' => '08' . rand(100000000, 999999999),
                 'email' => strtolower(str_replace(' ', '', $names[$i])) . '@email.com',
                 'address' => 'Jl. ' . $cities[$i % count($cities)] . ' No. ' . rand(1, 100) . ', ' . $cities[$i % count($cities)],
+                'is_walk_in' => false,
             ];
         }
 

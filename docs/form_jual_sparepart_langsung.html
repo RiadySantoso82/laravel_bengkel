@@ -1,0 +1,101 @@
+<div style="max-width:420px;margin:0 auto;background:var(--surface-1);border-radius:20px;padding:1.5rem;">
+<h2 class="sr-only">Form penjualan sparepart langsung untuk kasir, dengan keranjang belanja dan kalkulasi FIFO</h2>
+
+<div style="margin-bottom:1.25rem;">
+  <p style="font-weight:500;font-size:16px;margin:0 0 2px;">Jual Sparepart</p>
+  <p style="font-size:13px;color:var(--text-secondary);margin:0;">Penjualan tanpa servis</p>
+</div>
+
+<div style="margin-bottom:1rem;">
+  <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Pelanggan</label>
+  <button style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;text-align:left;border-radius:var(--radius);" onclick="sendPrompt('Buka pencarian pelanggan untuk penjualan sparepart')">
+    <span style="font-size:14px;">Pelanggan Umum (walk-in)</span>
+    <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-muted);" aria-hidden="true"></i>
+  </button>
+</div>
+
+<div style="margin-bottom:1rem;">
+  <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Tambah sparepart</label>
+  <button style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;text-align:left;border-radius:var(--radius);" onclick="sendPrompt('Buka pencarian sparepart untuk penjualan')">
+    <span style="font-size:14px;color:var(--text-secondary);">Cari kode atau nama sparepart...</span>
+    <i class="ti ti-search" style="font-size:16px;color:var(--text-muted);" aria-hidden="true"></i>
+  </button>
+</div>
+
+<p style="font-size:13px;font-weight:500;color:var(--text-secondary);margin:0 0 8px;">Keranjang (2 item)</p>
+
+<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1rem;">
+
+  <div style="background:var(--surface-2);border-radius:12px;padding:12px 14px;">
+    <div style="display:flex;align-items:center;justify-content:between;justify-content:space-between;margin-bottom:8px;">
+      <div>
+        <p style="font-size:14px;font-weight:500;margin:0;">Kampas Rem Depan Vario</p>
+        <p style="font-size:12px;color:var(--text-secondary);margin:0;">SKU-00231 · stok 12</p>
+      </div>
+      <button style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;" aria-label="Hapus item" onclick="sendPrompt('Hapus Kampas Rem Depan Vario dari keranjang')">
+        <i class="ti ti-x" style="font-size:14px;color:var(--text-muted);" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button style="width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:6px;">−</button>
+        <span style="font-size:14px;width:20px;text-align:center;">2</span>
+        <button style="width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:6px;">+</button>
+      </div>
+      <p style="font-size:14px;font-weight:500;margin:0;">Rp 90.000</p>
+    </div>
+    <p style="font-size:11px;color:var(--text-muted);margin:6px 0 0;">FIFO: 2 pcs dari batch 12 Jun 2026</p>
+  </div>
+
+  <div style="background:var(--surface-2);border-radius:12px;padding:12px 14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div>
+        <p style="font-size:14px;font-weight:500;margin:0;">Oli Mesin 1L</p>
+        <p style="font-size:12px;color:var(--text-secondary);margin:0;">SKU-00087 · stok 20</p>
+      </div>
+      <button style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;" aria-label="Hapus item" onclick="sendPrompt('Hapus Oli Mesin 1L dari keranjang')">
+        <i class="ti ti-x" style="font-size:14px;color:var(--text-muted);" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button style="width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:6px;">−</button>
+        <span style="font-size:14px;width:20px;text-align:center;">1</span>
+        <button style="width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:6px;">+</button>
+      </div>
+      <p style="font-size:14px;font-weight:500;margin:0;">Rp 55.000</p>
+    </div>
+    <p style="font-size:11px;color:var(--text-muted);margin:6px 0 0;">FIFO: 1 pcs dari batch 20 Jun 2026</p>
+  </div>
+
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px 14px;background:var(--surface-2);border-radius:12px;margin-bottom:1rem;">
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <p style="font-size:13px;color:var(--text-secondary);margin:0;">Subtotal</p>
+    <p style="font-size:13px;margin:0;">Rp 145.000</p>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <p style="font-size:13px;color:var(--text-secondary);margin:0;">Diskon</p>
+    <p style="font-size:13px;margin:0;">Rp 0</p>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding-top:6px;border-top:0.5px solid var(--border);">
+    <p style="font-size:14px;font-weight:500;margin:0;">Total</p>
+    <p style="font-size:16px;font-weight:600;margin:0;">Rp 145.000</p>
+  </div>
+</div>
+
+<div style="margin-bottom:1.25rem;">
+  <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Metode pembayaran</label>
+  <div style="display:flex;gap:8px;">
+    <button style="flex:1;padding:10px;text-align:center;background:var(--fill-primary);color:var(--on-primary);border:none;border-radius:var(--radius);font-size:13px;font-weight:500;">Cash</button>
+    <button style="flex:1;padding:10px;text-align:center;font-size:13px;">QRIS</button>
+    <button style="flex:1;padding:10px;text-align:center;font-size:13px;">Transfer</button>
+  </div>
+</div>
+
+<button style="padding:12px;text-align:center;background:var(--fill-primary);color:var(--on-primary);border:none;border-radius:var(--radius);font-size:14px;font-weight:500;" onclick="sendPrompt('Proses pembayaran penjualan sparepart ini')">
+  Proses & cetak struk
+</button>
+
+</div>

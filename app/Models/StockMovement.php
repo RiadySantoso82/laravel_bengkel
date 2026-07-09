@@ -19,4 +19,15 @@ class StockMovement extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function allocations()
+    {
+        return $this->hasMany(StockMovementAllocation::class, 'movement_id');
+    }
+
+    public function batches()
+    {
+        return $this->belongsToMany(StockBatch::class, 'stock_movement_allocations', 'movement_id', 'batch_id')
+            ->withPivot('qty_taken', 'cost_price');
+    }
 }

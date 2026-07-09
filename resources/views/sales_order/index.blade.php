@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Riwayat Stock Adjustment')
+@section('title', 'Penjualan')
 
 @push('styles')
 <style>
@@ -15,16 +15,12 @@
     table { width:100%;border-collapse:collapse; }
     th,td { text-align:left;padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:13px; }
     th { background:#f8fafc;font-weight:600;color:#475569;font-size:12px; }
-    tr:hover td { background:#f8fafc; }
-    tr.cursor-pointer { cursor:pointer; }
+    tr:hover td { background:#f8fafc;cursor:pointer; }
     .badge { display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600; }
-    .badge-in { background:#d1fae5;color:#065f46; }
-    .badge-out { background:#fde8e8;color:#991b1b; }
+    .badge-paid { background:#d1fae5;color:#065f46; }
+    .badge-pending { background:#fef3c7;color:#92400e; }
     .alert { padding:12px;border-radius:10px;margin-bottom:16px;font-size:13px; }
     .alert-success { background:#d1fae5;color:#065f46;border:1px solid #a7f3d0; }
-    .filter-bar { display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px; }
-    .filter-bar label { display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px; }
-    .filter-bar input { padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none; }
     .pagination { display:flex;gap:4px;justify-content:center;margin-top:16px; }
     .pagination a,.pagination span { padding:6px 12px;border-radius:6px;font-size:13px;text-decoration:none;color:#475569;background:#fff;border:1px solid #e2e8f0; }
     .pagination .active { background:#0f3460;color:#fff;border-color:#0f3460; }
@@ -36,47 +32,41 @@
     @include('layouts.sidebar')
     <main class="main-content">
         <div class="page-header">
-            <h1><i class="fas fa-balance-scale"></i> Stock Adjustment</h1>
-            <a href="{{ route('stock-adjustments.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Baru</a>
+            <h1><i class="fas fa-shopping-cart"></i> Penjualan</h1>
+            <a href="{{ route('sales-orders.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Baru</a>
         </div>
         @if (session('success'))
             <div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
         @endif
 
-        <form method="GET" class="filter-bar">
-            <div>
-                <label>Dari</label>
-                <input type="date" name="date_from" value="{{ $from ?? date('Y-m-d', strtotime('-30 days')) }}">
-            </div>
-            <div>
-                <label>Sampai</label>
-                <input type="date" name="date_to" value="{{ $to ?? date('Y-m-d') }}">
-            </div>
+        <form method="GET" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;">
+            <div><label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px;">Dari</label><input type="date" name="date_from" value="{{ $from ?? date('Y-m-d', strtotime('-30 days')) }}" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"></div>
+            <div><label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px;">Sampai</label><input type="date" name="date_to" value="{{ $to ?? date('Y-m-d') }}" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"></div>
             <button class="btn btn-primary" style="padding:8px 16px;"><i class="fas fa-search"></i></button>
-            <a href="{{ route('stock-adjustments.index') }}" class="btn btn-secondary" style="padding:8px 16px;"><i class="fas fa-undo"></i></a>
+            <a href="{{ route('sales-orders.index') }}" class="btn btn-secondary" style="padding:8px 16px;"><i class="fas fa-undo"></i></a>
         </form>
 
         <div class="card">
             <div class="card-body">
                 <table>
-                    <thead><tr><th>Tanggal</th><th>Sparepart</th><th>Qty</th><th>Alasan</th><th>Oleh</th></tr></thead>
+                    <thead><tr><th>#</th><th>Tanggal</th><th>Pelanggan</th><th>Item</th><th style="text-align:right;">Total</th><th>Status</th></tr></thead>
                     <tbody>
-                        @forelse ($data as $a)
-                        <tr class="cursor-pointer" onclick="window.location='{{ route('stock-adjustments.show', $a) }}'">
-                            <td style="white-space:nowrap;">{{ $a->transaction_date ? date('d/m/Y', strtotime($a->transaction_date)) : '-' }}</td>
-                            <td>{{ $a->sparepart->name ?? '-' }}</td>
-                            <td><span class="badge badge-{{ $a->qty > 0 ? 'in' : 'out' }}">{{ $a->qty > 0 ? '+'.$a->qty : $a->qty }}</span></td>
-                            <td>{{ $a->reason }}</td>
-                            <td>{{ $a->user->name ?? '-' }}</td>
+                        @forelse ($data as $o)
+                        <tr onclick="window.location='{{ route('sales-orders.show', $o) }}'">
+                            <td>SO{{ str_pad($o->id, 5, '0', STR_PAD_LEFT) }}</td>
+                            <td style="white-space:nowrap;">{{ $o->created_at->format('d/m/Y H:i') }}</td>
+                            <td>{{ $o->customer->name ?? 'Walk-in' }}</td>
+                            <td>{{ $o->details->sum('qty') }} pcs</td>
+                            <td style="text-align:right;">{{ number_format($o->total_amount - $o->discount, 0) }}</td>
+                            <td><span class="badge badge-{{ $o->payment_status }}">{{ $o->payment_status === 'paid' ? 'Lunas' : 'Pending' }}</span></td>
                         </tr>
                         @empty
-                        <tr><td colspan="5" style="text-align:center;padding:40px;color:#94a3b8;">Belum ada data adjustment</td></tr>
+                        <tr><td colspan="6" style="text-align:center;padding:40px;color:#94a3b8;">Belum ada penjualan</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-
         @if ($data->hasPages())
         <div class="pagination">{{ $data->links() }}</div>
         @endif

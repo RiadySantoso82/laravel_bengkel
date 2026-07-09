@@ -23,6 +23,7 @@ use App\Http\Controllers\PartRequestController;
 use App\Http\Controllers\PartReturnController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\SalesOrderController;
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -69,6 +70,14 @@ Route::middleware('auth')->group(function () {
     Route::get('stock-adjustments/create', [StockAdjustmentController::class, 'create'])->name('stock-adjustments.create');
     Route::get('stock-adjustments/search', [StockAdjustmentController::class, 'search'])->name('stock-adjustments.search');
     Route::post('stock-adjustments', [StockAdjustmentController::class, 'store'])->name('stock-adjustments.store');
+    Route::get('stock-adjustments/{stock_adjustment}', [StockAdjustmentController::class, 'show'])->name('stock-adjustments.show');
+    Route::delete('stock-adjustments/{stock_adjustment}', [StockAdjustmentController::class, 'destroy'])->name('stock-adjustments.destroy');
+    Route::get('sales-orders', [SalesOrderController::class, 'index'])->name('sales-orders.index');
+    Route::get('sales-orders/create', [SalesOrderController::class, 'create'])->name('sales-orders.create');
+    Route::get('sales-orders/search-part', [SalesOrderController::class, 'searchPart'])->name('sales-orders.search-part');
+    Route::post('sales-orders', [SalesOrderController::class, 'store'])->name('sales-orders.store');
+    Route::get('sales-orders/{salesOrder}', [SalesOrderController::class, 'show'])->name('sales-orders.show');
+    Route::delete('sales-orders/{salesOrder}', [SalesOrderController::class, 'destroy'])->name('sales-orders.destroy');
     Route::prefix('mechanic')->name('mechanic.')->group(function () {
         Route::get('/dashboard', [MechanicDashboardController::class, 'index'])->name('dashboard');
         Route::get('/services', [MechanicDashboardController::class, 'myServices'])->name('services');

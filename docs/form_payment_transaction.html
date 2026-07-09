@@ -1,0 +1,148 @@
+<div style="max-width:420px;margin:0 auto;background:var(--surface-1);border-radius:20px;padding:1.5rem;">
+<h2 class="sr-only">Form pembayaran dengan 4 pilihan metode: tunai, kartu, QRIS, dan transfer bank</h2>
+
+<div style="margin-bottom:1.25rem;">
+  <p style="font-weight:500;font-size:16px;margin:0 0 2px;">Pembayaran</p>
+  <p style="font-size:13px;color:var(--text-secondary);margin:0;">Total tagihan: <strong>Rp 145.000</strong></p>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:1.25rem;">
+  <button id="tab-cash" onclick="selectMethod('cash')" style="padding:10px 4px;text-align:center;background:var(--fill-primary);color:var(--on-primary);border:none;border-radius:var(--radius);font-size:12px;font-weight:500;">
+    <i class="ti ti-cash" style="font-size:18px;display:block;margin:0 auto 4px;" aria-hidden="true"></i>
+    Tunai
+  </button>
+  <button id="tab-card" onclick="selectMethod('card')" style="padding:10px 4px;text-align:center;border-radius:var(--radius);font-size:12px;">
+    <i class="ti ti-credit-card" style="font-size:18px;display:block;margin:0 auto 4px;" aria-hidden="true"></i>
+    Kartu
+  </button>
+  <button id="tab-qris" onclick="selectMethod('qris')" style="padding:10px 4px;text-align:center;border-radius:var(--radius);font-size:12px;">
+    <i class="ti ti-qrcode" style="font-size:18px;display:block;margin:0 auto 4px;" aria-hidden="true"></i>
+    QRIS
+  </button>
+  <button id="tab-transfer" onclick="selectMethod('transfer')" style="padding:10px 4px;text-align:center;border-radius:var(--radius);font-size:12px;">
+    <i class="ti ti-building-bank" style="font-size:18px;display:block;margin:0 auto 4px;" aria-hidden="true"></i>
+    Transfer
+  </button>
+</div>
+
+<!-- TUNAI -->
+<div id="form-cash" style="display:flex;flex-direction:column;gap:1rem;">
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Uang diterima</label>
+    <input type="number" id="cash-received" oninput="calcChange()" value="150000" style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;" />
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+    <button onclick="setCash(150000)" style="padding:6px 12px;font-size:12px;border-radius:999px;">Rp 150.000</button>
+    <button onclick="setCash(145000)" style="padding:6px 12px;font-size:12px;border-radius:999px;">Uang pas</button>
+    <button onclick="setCash(200000)" style="padding:6px 12px;font-size:12px;border-radius:999px;">Rp 200.000</button>
+  </div>
+  <div style="background:var(--surface-2);border-radius:var(--radius);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;">
+    <p style="font-size:13px;color:var(--text-secondary);margin:0;">Kembalian</p>
+    <p id="change-amount" style="font-size:18px;font-weight:600;margin:0;">Rp 5.000</p>
+  </div>
+</div>
+
+<!-- KARTU -->
+<div id="form-card" style="display:none;flex-direction:column;gap:1rem;">
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Jenis kartu</label>
+    <div style="display:flex;gap:8px;">
+      <button style="flex:1;padding:10px;text-align:center;background:var(--fill-primary);color:var(--on-primary);border:none;border-radius:var(--radius);font-size:13px;font-weight:500;">Debit</button>
+      <button style="flex:1;padding:10px;text-align:center;font-size:13px;">Kredit</button>
+    </div>
+  </div>
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Bank penerbit</label>
+    <select style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;background:var(--surface-1);">
+      <option>BCA</option>
+      <option>Mandiri</option>
+      <option>BNI</option>
+      <option>BRI</option>
+      <option>Lainnya</option>
+    </select>
+  </div>
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">4 digit terakhir kartu</label>
+    <input type="text" maxlength="4" placeholder="1234" style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;" />
+  </div>
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Kode approval EDC</label>
+    <input type="text" placeholder="Dari struk mesin EDC" style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;" />
+  </div>
+  <p style="font-size:11px;color:var(--text-muted);margin:0;">Nomor kartu lengkap & CVV tidak disimpan di sistem — cukup 4 digit terakhir untuk referensi.</p>
+</div>
+
+<!-- QRIS -->
+<div id="form-qris" style="display:none;flex-direction:column;gap:1rem;align-items:center;text-align:center;">
+  <div style="width:180px;height:180px;background:var(--surface-2);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;">
+    <i class="ti ti-qrcode" style="font-size:64px;color:var(--text-muted);" aria-hidden="true"></i>
+  </div>
+  <p style="font-size:13px;color:var(--text-secondary);margin:0;">Pelanggan scan QR di atas untuk bayar Rp 145.000</p>
+  <div style="width:100%;text-align:left;">
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">No. referensi transaksi</label>
+    <input type="text" placeholder="Diisi otomatis setelah pembayaran masuk" style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;" />
+  </div>
+</div>
+
+<!-- TRANSFER -->
+<div id="form-transfer" style="display:none;flex-direction:column;gap:1rem;">
+  <div style="background:var(--surface-2);border-radius:var(--radius);padding:0.75rem 1rem;">
+    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 2px;">Transfer ke</p>
+    <p style="font-size:14px;font-weight:500;margin:0;">BCA 1234567890 a.n. Bengkel Jaya Motor</p>
+  </div>
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Bank asal transfer</label>
+    <select style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;background:var(--surface-1);">
+      <option>BCA</option>
+      <option>Mandiri</option>
+      <option>BNI</option>
+      <option>BRI</option>
+      <option>Lainnya</option>
+    </select>
+  </div>
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">No. referensi transfer</label>
+    <input type="text" placeholder="Dari bukti transfer" style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;" />
+  </div>
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Bukti transfer</label>
+    <button style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--radius);border:1px dashed var(--border);">
+      <i class="ti ti-upload" style="font-size:16px;" aria-hidden="true"></i>
+      <span style="font-size:13px;">Upload foto bukti</span>
+    </button>
+  </div>
+</div>
+
+<button style="width:100%;padding:12px;text-align:center;background:var(--fill-primary);color:var(--on-primary);border:none;border-radius:var(--radius);font-size:14px;font-weight:500;margin-top:1.25rem;" onclick="sendPrompt('Konfirmasi pembayaran ini')">
+  Konfirmasi pembayaran
+</button>
+
+<script>
+function selectMethod(method) {
+  const tabs = ['cash','card','qris','transfer'];
+  tabs.forEach(t => {
+    const tab = document.getElementById('tab-' + t);
+    const form = document.getElementById('form-' + t);
+    if (t === method) {
+      tab.style.background = 'var(--fill-primary)';
+      tab.style.color = 'var(--on-primary)';
+      form.style.display = 'flex';
+    } else {
+      tab.style.background = '';
+      tab.style.color = '';
+      form.style.display = 'none';
+    }
+  });
+}
+function setCash(val) {
+  document.getElementById('cash-received').value = val;
+  calcChange();
+}
+function calcChange() {
+  const total = 145000;
+  const received = parseInt(document.getElementById('cash-received').value) || 0;
+  const change = received - total;
+  document.getElementById('change-amount').textContent = 'Rp ' + change.toLocaleString('id-ID');
+}
+</script>
+</div>

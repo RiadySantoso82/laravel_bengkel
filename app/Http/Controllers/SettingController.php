@@ -19,6 +19,12 @@ class SettingController extends Controller
         $request->validate(['confirm' => 'required|in:1']);
 
         $tables = [
+            'payment_transactions',
+            'stock_movement_allocations', 'stock_batches',
+            'sales_order_details', 'sales_orders',
+            'stock_adjustments',
+            'part_returns', 'part_request_details', 'part_requests',
+            'service_order_photos', 'service_order_checklist', 'checklist_items',
             'purchase_order_details', 'purchase_orders', 'stock_movements',
             'service_order_details', 'service_orders', 'invoices',
             'vehicles', 'customers', 'suppliers', 'mechanics',

@@ -72,6 +72,11 @@
                         </div>
                     </div>
 
+                    <div class="form-group" id="buyPriceGroup">
+                        <label>Harga beli (per pcs)</label>
+                        <input type="number" name="buy_price" class="form-control" value="{{ old('buy_price', 0) }}" min="0" step="100">
+                    </div>
+
                     <div class="form-group">
                         <label>Jumlah (qty)</label>
                         <input type="number" name="qty" class="form-control" value="{{ old('qty', 1) }}" min="1" required>
@@ -164,7 +169,7 @@ function renderResults() {
 function doSearch() {
     const q = document.getElementById('searchInput').value;
     const url = '{{ route("stock-adjustments.search") }}?q=' + encodeURIComponent(q) + '&page=1' + (searchCat ? '&category_id=' + searchCat : '');
-    fetch(url).then(r => r.json()).then(data => {
+    fetch(url).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(data => {
         const cats = data.categories;
         searchData = data.results;
         document.getElementById('categoryFilters').innerHTML = '<button onclick="searchCat=0;doSearch()" class="' + (searchCat === 0 ? 'active' : '') + '">Semua kategori</button>' +
@@ -195,6 +200,7 @@ function setType(type) {
     document.getElementById('adjType').value = type;
     document.getElementById('toggleIn').classList.toggle('active', type === 'in');
     document.getElementById('toggleOut').classList.toggle('active', type === 'out');
+    document.getElementById('buyPriceGroup').style.display = type === 'in' ? 'block' : 'none';
     updateStokAfter();
 }
 

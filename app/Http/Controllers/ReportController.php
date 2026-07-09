@@ -18,13 +18,14 @@ class ReportController extends Controller
 
     public function movements(Request $request)
     {
-        $query = StockMovement::with('sparepart')
+        $query = StockMovement::with('sparepart', 'creator')
             ->when($request->part_id, fn($q, $v) => $q->where('part_id', $v))
             ->when($request->type, fn($q, $v) => $q->where('movement_type', $v))
-            ->when($request->date_from, fn($q, $v) => $q->whereDate('created_at', '>=', $v))
-            ->when($request->date_to, fn($q, $v) => $q->whereDate('created_at', '<=', $v));
+            ->when($request->source_type, fn($q, $v) => $q->where('source_type', $v))
+            ->when($request->date_from, fn($q, $v) => $q->whereDate('transaction_date', '>=', $v))
+            ->when($request->date_to, fn($q, $v) => $q->whereDate('transaction_date', '<=', $v));
 
-        $data = $query->latest()->paginate(50);
+        $data = $query->latest('transaction_date')->paginate(50);
         $spareparts = Sparepart::orderBy('name')->pluck('name', 'id');
 
         return view('report.movements', compact('data', 'spareparts'));

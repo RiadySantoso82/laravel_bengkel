@@ -56,7 +56,7 @@
                                 <td>SO-{{ str_pad($inv->order_id, 4, '0', STR_PAD_LEFT) }}</td>
                                 <td>{{ $inv->order->customer->name ?? '-' }}</td>
                                 <td class="text-right">{{ number_format($inv->total_amount - $inv->discount, 0) }}</td>
-                                <td>{{ $inv->paymentMethod->name ?? '-' }}</td>
+                                <td>{{ $inv->payments->first()->paymentMethod->name ?? '-' }}</td>
                                 <td><span class="badge badge-{{ $inv->payment_status }}">{{ $inv->payment_status === 'paid' ? 'Lunas' : ($inv->payment_status === 'partial' ? 'Cicil' : 'Pending') }}</span></td>
                                 <td>
                                     <div class="actions">
