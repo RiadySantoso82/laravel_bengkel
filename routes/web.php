@@ -22,6 +22,7 @@ use App\Http\Controllers\ChecklistItemController;
 use App\Http\Controllers\PartRequestController;
 use App\Http\Controllers\PartReturnController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\StockAdjustmentController;
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -64,6 +65,10 @@ Route::middleware('auth')->group(function () {
     Route::post('part-returns/{partReturn}/confirm', [PartReturnController::class, 'confirm'])->name('part-returns.confirm');
     Route::get('reports/movements', [ReportController::class, 'movements'])->name('reports.movements');
     Route::get('reports/stock', [ReportController::class, 'stock'])->name('reports.stock');
+    Route::get('stock-adjustments', [StockAdjustmentController::class, 'index'])->name('stock-adjustments.index');
+    Route::get('stock-adjustments/create', [StockAdjustmentController::class, 'create'])->name('stock-adjustments.create');
+    Route::get('stock-adjustments/search', [StockAdjustmentController::class, 'search'])->name('stock-adjustments.search');
+    Route::post('stock-adjustments', [StockAdjustmentController::class, 'store'])->name('stock-adjustments.store');
     Route::prefix('mechanic')->name('mechanic.')->group(function () {
         Route::get('/dashboard', [MechanicDashboardController::class, 'index'])->name('dashboard');
         Route::get('/services', [MechanicDashboardController::class, 'myServices'])->name('services');

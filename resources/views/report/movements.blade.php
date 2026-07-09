@@ -81,7 +81,7 @@
                         <tr>
                             <td style="white-space:nowrap;">{{ $m->created_at->format('d/m/Y H:i') }}</td>
                             <td>{{ $m->sparepart->name ?? 'Part #'.$m->part_id }}</td>
-                            <td><span class="badge badge-{{ $m->type }}">{{ $m->type === 'in' ? 'Masuk' : 'Keluar' }}</span></td>
+                            <td><span class="badge badge-{{ $m->movement_type }}">{{ $m->movement_type === 'in' ? 'Masuk' : 'Keluar' }}</span></td>
                             <td>{{ $m->qty }}</td>
                             <td style="font-size:12px;color:#888;">#{{ $m->reference_id }}</td>
                         </tr>

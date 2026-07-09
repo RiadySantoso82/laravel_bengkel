@@ -12,6 +12,7 @@ use App\Models\PartRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 use App\Models\PartRequestDetail;
@@ -268,10 +269,27 @@ class MechanicDashboardController extends Controller
     public function updateProfile(Request $request)
     {
         $mechanic = $this->getMechanic();
-        $request->validate(['phone' => 'nullable|max:50', 'specialization' => 'nullable|max:255']);
-        if ($mechanic) {
-            $mechanic->update($request->only(['phone', 'specialization']));
+        $rules = ['phone' => 'nullable|max:50'];
+
+        if ($request->filled('current_password') || $request->filled('new_password')) {
+            $rules['current_password'] = 'required';
+            $rules['new_password'] = 'required|min:6';
+            $rules['new_password_confirmation'] = 'required|same:new_password';
         }
+
+        $request->validate($rules);
+
+        if ($request->filled('current_password')) {
+            if (!Hash::check($request->current_password, auth()->user()->password)) {
+                return back()->withErrors(['current_password' => 'Password saat ini salah.']);
+            }
+            auth()->user()->update(['password' => Hash::make($request->new_password)]);
+        }
+
+        if ($mechanic) {
+            $mechanic->update($request->only(['phone']));
+        }
+
         return redirect()->route('mechanic.profile')->with('success', 'Profil berhasil diupdate.');
     }
 

@@ -34,6 +34,10 @@ erDiagram
     MECHANIC ||--o{ PART_RETURN : mengembalikan
     USER ||--o{ PART_RETURN : mengonfirmasi
     PART_RETURN ||--o{ STOCK_MOVEMENT : memicu
+    SPAREPART ||--o{ STOCK_ADJUSTMENT : disesuaikan
+    USER ||--o{ STOCK_ADJUSTMENT : melakukan
+    STOCK_ADJUSTMENT ||--o{ STOCK_MOVEMENT : memicu
+    USER ||--o{ STOCK_MOVEMENT : mencatat
 
     CUSTOMER {
         int customer_id PK
@@ -95,17 +99,19 @@ erDiagram
         int unit_id FK
         decimal buy_price
         decimal sell_price
-        int stock_qty
         int min_stock
     }
 
     STOCK_MOVEMENT {
         int movement_id PK
         int part_id FK
-        string type
+        string movement_type "in atau out"
+        string source_type "purchase_order, part_request, part_return, stock_adjustment, service_order_detail"
+        int source_id "merujuk ke tabel sesuai source_type"
         int qty
-        int reference_id
-        datetime created_at
+        date transaction_date "tanggal transaksi sebenarnya"
+        datetime created_at "waktu record dibuat di sistem"
+        int created_by FK
     }
 
     MECHANIC {
@@ -239,4 +245,15 @@ erDiagram
         string reason "tidak_cocok atau tidak_dipakai"
         datetime returned_at
         datetime confirmed_at
+    }
+
+    STOCK_ADJUSTMENT {
+        int adjustment_id PK
+        int part_id FK
+        int user_id FK
+        int qty "bisa plus/minus"
+        string reason "saldo_awal, koreksi_stock_opname, barang_rusak, dll"
+        string notes
+        date transaction_date
+        datetime created_at
     }

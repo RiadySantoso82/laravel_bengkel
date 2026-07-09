@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\PartReturn;
 use App\Models\StockMovement;
-use App\Models\Sparepart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,11 +37,13 @@ class PartReturnController extends Controller
 
             StockMovement::create([
                 'part_id' => $partReturn->detail->part_id,
-                'type' => 'in',
+                'movement_type' => 'in',
+                'source_type' => 'part_return',
+                'source_id' => $partReturn->detail->id,
                 'qty' => $partReturn->qty_returned,
-                'reference_id' => $partReturn->detail->id,
+                'transaction_date' => now(),
+                'created_by' => Auth::id(),
             ]);
-            Sparepart::where('id', $partReturn->detail->part_id)->increment('stock_qty', $partReturn->qty_returned);
         });
 
         return redirect()->route('part-returns.index')->with('success', 'Retur dikonfirmasi, stok sudah dikembalikan.');

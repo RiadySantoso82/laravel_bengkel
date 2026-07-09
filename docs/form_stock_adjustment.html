@@ -1,0 +1,78 @@
+<div style="max-width:420px;margin:0 auto;background:var(--surface-1);border-radius:20px;padding:1.5rem;">
+<h2 class="sr-only">Form stock adjustment untuk koreksi atau saldo awal stok sparepart</h2>
+
+<div style="margin-bottom:1.25rem;">
+  <p style="font-weight:500;font-size:16px;margin:0 0 2px;">Stock Adjustment</p>
+  <p style="font-size:13px;color:var(--text-secondary);margin:0;">Koreksi manual stok sparepart</p>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:1rem;">
+
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Sparepart</label>
+    <button style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;text-align:left;border-radius:var(--radius);" onclick="sendPrompt('Buka pencarian sparepart untuk stock adjustment')">
+      <span style="font-size:14px;color:var(--text-secondary);">Cari kode atau nama sparepart...</span>
+      <i class="ti ti-search" style="font-size:16px;color:var(--text-muted);" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div style="background:var(--surface-2);border-radius:var(--radius);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <p style="font-size:13px;font-weight:500;margin:0;">Kampas Rem Depan Vario</p>
+      <p style="font-size:12px;color:var(--text-secondary);margin:0;">SKU-00231 · pcs</p>
+    </div>
+    <div style="text-align:right;">
+      <p style="font-size:11px;color:var(--text-secondary);margin:0;">Stok sistem saat ini</p>
+      <p style="font-size:18px;font-weight:500;margin:0;">12</p>
+    </div>
+  </div>
+
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Jenis penyesuaian</label>
+    <div style="display:flex;gap:8px;">
+      <button style="flex:1;padding:10px;text-align:center;background:var(--fill-primary);color:var(--on-primary);border:none;border-radius:var(--radius);font-size:14px;font-weight:500;">
+        + Tambah stok
+      </button>
+      <button style="flex:1;padding:10px;text-align:center;font-size:14px;">
+        − Kurangi stok
+      </button>
+    </div>
+  </div>
+
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Jumlah (qty)</label>
+    <input type="number" value="5" style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;" />
+  </div>
+
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Alasan</label>
+    <select style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;background:var(--surface-1);">
+      <option>Saldo awal</option>
+      <option>Koreksi stock opname</option>
+      <option>Barang rusak</option>
+      <option>Barang hilang</option>
+      <option>Lainnya</option>
+    </select>
+  </div>
+
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Catatan</label>
+    <textarea rows="3" placeholder="Opsional, misal: hasil stock opname bulan Juli" style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;resize:none;font-family:inherit;"></textarea>
+  </div>
+
+  <div>
+    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Tanggal transaksi</label>
+    <input type="date" value="2026-07-09" style="width:100%;padding:10px 12px;border-radius:var(--radius);font-size:14px;" />
+  </div>
+
+  <div style="background:var(--surface-2);border-radius:var(--radius);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+    <p style="font-size:13px;color:var(--text-secondary);margin:0;">Stok setelah penyesuaian</p>
+    <p style="font-size:16px;font-weight:500;margin:0;">17</p>
+  </div>
+
+  <button style="padding:12px;text-align:center;background:var(--fill-primary);color:var(--on-primary);border:none;border-radius:var(--radius);font-size:14px;font-weight:500;margin-top:4px;" onclick="sendPrompt('Simpan stock adjustment ini')">
+    Simpan penyesuaian
+  </button>
+
+</div>
+</div>

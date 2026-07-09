@@ -42,6 +42,7 @@
             @endif
         </a>
         <a href="{{ route('invoices.index') }}"><i class="fas fa-file-invoice-dollar"></i> Invoice</a>
+        <a href="{{ route('stock-adjustments.index') }}"><i class="fas fa-balance-scale"></i> Stock Adjustment</a>
 
         <div class="nav-section">Data Master</div>
         <a href="{{ route('customers.index') }}"><i class="fas fa-users"></i> Pelanggan</a>

@@ -47,11 +47,13 @@ class PartRequestController extends Controller
             if ($qty > 0) {
                 StockMovement::create([
                     'part_id' => $detail->part_id,
-                    'type' => 'out',
+                    'movement_type' => 'out',
+                    'source_type' => 'part_request',
+                    'source_id' => $detail->id,
                     'qty' => $qty,
-                    'reference_id' => $detail->id,
+                    'transaction_date' => now(),
+                    'created_by' => Auth::id(),
                 ]);
-                Sparepart::where('id', $detail->part_id)->decrement('stock_qty', $qty);
             }
 
             $pr = $detail->partRequest;

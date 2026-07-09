@@ -1,0 +1,61 @@
+<div style="max-width:420px;margin:0 auto;background:var(--surface-1);border-radius:20px;padding:1.25rem;">
+<h2 class="sr-only">Pencarian sparepart untuk stock adjustment, menampilkan hasil pencarian dengan kode, nama, kategori, dan stok saat ini</h2>
+
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+  <button style="width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;" aria-label="Kembali" onclick="sendPrompt('Kembali ke form stock adjustment')">
+    <i class="ti ti-arrow-left" style="font-size:18px;" aria-hidden="true"></i>
+  </button>
+  <p style="font-weight:500;font-size:15px;margin:0;">Pilih sparepart</p>
+</div>
+
+<div style="position:relative;margin-bottom:1rem;">
+  <i class="ti ti-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--text-muted);" aria-hidden="true"></i>
+  <input type="text" value="kampas" placeholder="Cari kode atau nama sparepart..." style="width:100%;padding:10px 12px 10px 36px;border-radius:var(--radius);font-size:14px;" />
+</div>
+
+<div style="display:flex;gap:8px;margin-bottom:1rem;overflow-x:auto;">
+  <button style="padding:6px 14px;font-size:13px;white-space:nowrap;background:var(--fill-primary);color:var(--on-primary);border-radius:999px;border:none;">Semua kategori</button>
+  <button style="padding:6px 14px;font-size:13px;white-space:nowrap;border-radius:999px;">Rem</button>
+  <button style="padding:6px 14px;font-size:13px;white-space:nowrap;border-radius:999px;">Mesin</button>
+  <button style="padding:6px 14px;font-size:13px;white-space:nowrap;border-radius:999px;">Kelistrikan</button>
+</div>
+
+<p style="font-size:12px;color:var(--text-secondary);margin:0 0 8px;">3 hasil ditemukan</p>
+
+<div style="display:flex;flex-direction:column;gap:8px;">
+
+  <button style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;text-align:left;border-radius:12px;" onclick="sendPrompt('Pilih sparepart Kampas Rem Depan Vario untuk stock adjustment')">
+    <div>
+      <p style="font-size:14px;font-weight:500;margin:0;">Kampas Rem Depan Vario</p>
+      <p style="font-size:12px;color:var(--text-secondary);margin:0;">SKU-00231 · Rem · pcs</p>
+    </div>
+    <div style="text-align:right;">
+      <p style="font-size:11px;color:var(--text-secondary);margin:0;">Stok</p>
+      <p style="font-size:16px;font-weight:500;margin:0;">12</p>
+    </div>
+  </button>
+
+  <button style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;text-align:left;border-radius:12px;" onclick="sendPrompt('Pilih sparepart Kampas Rem Belakang Beat untuk stock adjustment')">
+    <div>
+      <p style="font-size:14px;font-weight:500;margin:0;">Kampas Rem Belakang Beat</p>
+      <p style="font-size:12px;color:var(--text-secondary);margin:0;">SKU-00245 · Rem · pcs</p>
+    </div>
+    <div style="text-align:right;">
+      <p style="font-size:11px;color:var(--text-secondary);margin:0;">Stok</p>
+      <p style="font-size:16px;font-weight:500;margin:0;">8</p>
+    </div>
+  </button>
+
+  <button style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;text-align:left;border-radius:12px;" onclick="sendPrompt('Pilih sparepart Kampas Kopling CVT NMAX untuk stock adjustment')">
+    <div>
+      <p style="font-size:14px;font-weight:500;margin:0;">Kampas Kopling CVT NMAX</p>
+      <p style="font-size:12px;color:var(--text-secondary);margin:0;">SKU-00189 · Mesin · pcs</p>
+    </div>
+    <div style="text-align:right;">
+      <p style="font-size:11px;color:var(--text-secondary);margin:0;">Stok</p>
+      <p style="font-size:16px;font-weight:500;margin:0;">3</p>
+    </div>
+  </button>
+
+</div>
+</div>

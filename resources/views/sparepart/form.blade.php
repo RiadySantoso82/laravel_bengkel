@@ -58,7 +58,6 @@
                     <div class="form-group"><label for="sell_price">Harga Jual</label><input type="number" id="sell_price" name="sell_price" class="form-control" value="{{ old('sell_price', $sparepart->sell_price ?? 0) }}" min="0" step="100"></div>
                 </div>
                 <div class="row">
-                    <div class="form-group"><label for="stock_qty">Stok</label><input type="number" id="stock_qty" name="stock_qty" class="form-control" value="{{ old('stock_qty', $sparepart->stock_qty ?? 0) }}" min="0"></div>
                     <div class="form-group"><label for="min_stock">Min. Stok</label><input type="number" id="min_stock" name="min_stock" class="form-control" value="{{ old('min_stock', $sparepart->min_stock ?? 0) }}" min="0"></div>
                 </div>
                 <div class="form-actions"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button><a href="{{ route('spareparts.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a></div>

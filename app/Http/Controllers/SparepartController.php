@@ -31,10 +31,9 @@ class SparepartController extends Controller
             'unit_id' => 'nullable|exists:units,id',
             'buy_price' => 'nullable|numeric|min:0',
             'sell_price' => 'nullable|numeric|min:0',
-            'stock_qty' => 'nullable|integer|min:0',
             'min_stock' => 'nullable|integer|min:0',
         ]);
-        Sparepart::create($request->only(['code', 'name', 'category_id', 'unit_id', 'buy_price', 'sell_price', 'stock_qty', 'min_stock']));
+        Sparepart::create($request->only(['code', 'name', 'category_id', 'unit_id', 'buy_price', 'sell_price', 'min_stock']));
         return redirect()->route('spareparts.index')->with('success', 'Sparepart berhasil ditambahkan.');
     }
 
@@ -54,10 +53,9 @@ class SparepartController extends Controller
             'unit_id' => 'nullable|exists:units,id',
             'buy_price' => 'nullable|numeric|min:0',
             'sell_price' => 'nullable|numeric|min:0',
-            'stock_qty' => 'nullable|integer|min:0',
             'min_stock' => 'nullable|integer|min:0',
         ]);
-        $sparepart->update($request->only(['code', 'name', 'category_id', 'unit_id', 'buy_price', 'sell_price', 'stock_qty', 'min_stock']));
+        $sparepart->update($request->only(['code', 'name', 'category_id', 'unit_id', 'buy_price', 'sell_price', 'min_stock']));
         return redirect()->route('spareparts.index')->with('success', 'Sparepart berhasil diubah.');
     }
 
@@ -150,7 +148,6 @@ class SparepartController extends Controller
                 'unit_id' => !empty($uids) ? $uids[array_rand($uids)] : null,
                 'buy_price' => $buy,
                 'sell_price' => $sell,
-                'stock_qty' => $stock,
                 'min_stock' => 5,
             ];
         }

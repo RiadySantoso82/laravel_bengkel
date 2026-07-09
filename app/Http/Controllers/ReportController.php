@@ -20,7 +20,7 @@ class ReportController extends Controller
     {
         $query = StockMovement::with('sparepart')
             ->when($request->part_id, fn($q, $v) => $q->where('part_id', $v))
-            ->when($request->type, fn($q, $v) => $q->where('type', $v))
+            ->when($request->type, fn($q, $v) => $q->where('movement_type', $v))
             ->when($request->date_from, fn($q, $v) => $q->whereDate('created_at', '>=', $v))
             ->when($request->date_to, fn($q, $v) => $q->whereDate('created_at', '<=', $v));
 
