@@ -25,10 +25,14 @@ class ReportController extends Controller
             ->when($request->date_from, fn($q, $v) => $q->whereDate('transaction_date', '>=', $v))
             ->when($request->date_to, fn($q, $v) => $q->whereDate('transaction_date', '<=', $v));
 
-        $data = $query->latest('transaction_date')->paginate(50);
+        $sortOrder = $request->sort ?? 'asc';
+
+        $movements = $query->orderBy('transaction_date', $sortOrder)->get();
+        $grouped = $movements->groupBy('part_id')->sortBy(fn($items, $partId) => optional($items->first()->sparepart)->name);
+
         $spareparts = Sparepart::orderBy('name')->pluck('name', 'id');
 
-        return view('report.movements', compact('data', 'spareparts'));
+        return view('report.movements', compact('grouped', 'spareparts', 'sortOrder'));
     }
 
     public function stock()

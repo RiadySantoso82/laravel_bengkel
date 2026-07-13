@@ -13,6 +13,7 @@ use App\Services\FifoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SalesOrderController extends Controller
 {
@@ -151,6 +152,158 @@ class SalesOrderController extends Controller
     {
         $salesOrder->load(['customer', 'user', 'details.sparepart', 'payments.paymentMethod', 'payments.creator']);
         return view('sales_order.show', compact('salesOrder'));
+    }
+
+    public function edit(SalesOrder $salesOrder)
+    {
+        if ($salesOrder->payment_status !== 'pending') {
+            return redirect()->route('sales-orders.index')->with('error', 'Hanya order pending yang bisa diedit.');
+        }
+        $salesOrder->load('details.sparepart');
+        $savedItems = $salesOrder->details->map(function($d) {
+            $sp = $d->sparepart;
+            return [
+                'id' => $d->part_id,
+                'name' => $sp->name ?? 'Part #'.$d->part_id,
+                'code' => $sp->code ?? '',
+                'stock_qty' => $sp->stock_qty ?? 0,
+                'stock' => $sp->stock_qty ?? 0,
+                'sell_price' => (float) $d->sell_price,
+                'qty' => $d->qty,
+            ];
+        })->values();
+        $customers = Customer::orderBy('name')->get();
+        $paymentMethods = PaymentMethod::where('is_active', true)->orderBy('name')->get();
+        return view('sales_order.edit', compact('salesOrder', 'savedItems', 'customers', 'paymentMethods'));
+    }
+
+    public function update(Request $request, SalesOrder $salesOrder)
+    {
+        Log::error('masuk sini');
+        if ($salesOrder->payment_status !== 'pending') {
+            return redirect()->route('sales-orders.index')->with('error', 'Hanya order pending yang bisa diupdate.');
+        }
+
+        $items = is_string($request->items) ? json_decode($request->items, true) : $request->items;
+        if (!is_array($items)) $items = [];
+        $request->merge(['items' => $items]);
+
+        $request->validate([
+            'customer_id' => 'nullable|exists:customers,id',
+            'items' => 'required|array|min:1',
+            'items.*.part_id' => 'required|exists:spareparts,id',
+            'items.*.qty' => 'required|integer|min:1',
+            'items.*.sell_price' => 'required|numeric|min:0',
+            'payment_method_id' => 'nullable|exists:payment_methods,id',
+        ]);
+
+        $processPayment = $request->filled('payment_method_id');
+
+        DB::transaction(function () use ($request, $salesOrder, $items, $processPayment) {
+            $salesOrder->update([
+                'customer_id' => $request->customer_id,
+            ]);
+
+            $salesOrder->details()->delete();
+            $newDetails = [];
+            foreach ($items as $item) {
+                $newDetails[] = SalesOrderDetail::create([
+                    'sales_order_id' => $salesOrder->id,
+                    'part_id' => $item['part_id'],
+                    'qty' => $item['qty'],
+                    'sell_price' => $item['sell_price'],
+                    'cost_price' => 0,
+                ]);
+            }
+            $newTotal = collect($items)->sum(fn($i) => $i['qty'] * $i['sell_price']);
+            $salesOrder->update(['total_amount' => $newTotal, 'discount' => $request->discount ?? 0]);
+
+            if ($processPayment) {
+                $total = $newTotal - ($request->discount ?? 0);
+                PaymentTransaction::create([
+                    'reference_type' => 'sales_order',
+                    'reference_id' => $salesOrder->id,
+                    'payment_method_id' => $request->payment_method_id,
+                    'created_by' => Auth::id(),
+                    'amount' => max(0, $total),
+                    'amount_received' => $request->amount_received,
+                    'change_amount' => $request->change_amount,
+                    'paid_at' => now(),
+                ]);
+
+                foreach ($newDetails as $d) {
+                    $movement = StockMovement::create([
+                        'part_id' => $d->part_id,
+                        'movement_type' => 'out',
+                        'source_type' => 'sales_order_detail',
+                        'source_id' => $salesOrder->id,
+                        'qty' => $d->qty,
+                        'transaction_date' => now(),
+                        'created_by' => Auth::id(),
+                    ]);
+                    $result = FifoService::allocateOut($movement, $d->part_id, $d->qty);
+                    if ($result['remaining'] > 0) {
+                        throw new \Exception("Stok part ID {$d->part_id} tidak mencukupi.");
+                    }
+                    $d->update(['cost_price' => $result['total_cost']]);
+                }
+                $salesOrder->update(['payment_status' => 'paid']);
+            }
+        });
+
+        $msg = $processPayment ? 'Order berhasil diupdate & pembayaran diproses.' : 'Order pending berhasil diupdate.';
+        return redirect()->route('sales-orders.show', $salesOrder)->with('success', $msg);
+    }
+
+    public function processPayment(Request $request, SalesOrder $salesOrder)
+    {
+        if ($salesOrder->payment_status !== 'pending') {
+            return redirect()->route('sales-orders.index')->with('error', 'Order ini sudah diproses.');
+        }
+
+        $request->validate([
+            'payment_method_id' => 'required|exists:payment_methods,id',
+            'amount_received' => 'nullable|numeric|min:0',
+            'change_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        DB::transaction(function () use ($request, $salesOrder) {
+            $total = $salesOrder->total_amount - $salesOrder->discount;
+
+            PaymentTransaction::create([
+                'reference_type' => 'sales_order',
+                'reference_id' => $salesOrder->id,
+                'payment_method_id' => $request->payment_method_id,
+                'created_by' => Auth::id(),
+                'amount' => $total,
+                'amount_received' => $request->amount_received,
+                'change_amount' => $request->change_amount,
+                'paid_at' => now(),
+            ]);
+
+            foreach ($salesOrder->details as $d) {
+                $movement = StockMovement::create([
+                    'part_id' => $d->part_id,
+                    'movement_type' => 'out',
+                    'source_type' => 'sales_order_detail',
+                    'source_id' => $salesOrder->id,
+                    'qty' => $d->qty,
+                    'transaction_date' => now(),
+                    'created_by' => Auth::id(),
+                ]);
+
+                $result = FifoService::allocateOut($movement, $d->part_id, $d->qty);
+                if ($result['remaining'] > 0) {
+                    throw new \Exception("Stok part ID {$d->part_id} tidak mencukupi. Kurang {$result['remaining']} pcs.");
+                }
+
+                $d->update(['cost_price' => $result['total_cost']]);
+            }
+
+            $salesOrder->update(['payment_status' => 'paid']);
+        });
+
+        return redirect()->route('sales-orders.show', $salesOrder)->with('success', 'Pembayaran berhasil diproses.');
     }
 
     public function destroy(SalesOrder $salesOrder)

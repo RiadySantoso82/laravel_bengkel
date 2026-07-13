@@ -77,6 +77,9 @@ Route::middleware('auth')->group(function () {
     Route::get('sales-orders/search-part', [SalesOrderController::class, 'searchPart'])->name('sales-orders.search-part');
     Route::post('sales-orders', [SalesOrderController::class, 'store'])->name('sales-orders.store');
     Route::get('sales-orders/{salesOrder}', [SalesOrderController::class, 'show'])->name('sales-orders.show');
+    Route::get('sales-orders/{salesOrder}/edit', [SalesOrderController::class, 'edit'])->name('sales-orders.edit');
+    Route::put('sales-orders/{salesOrder}', [SalesOrderController::class, 'update'])->name('sales-orders.update');
+    Route::post('sales-orders/{salesOrder}/process-payment', [SalesOrderController::class, 'processPayment'])->name('sales-orders.process-payment');
     Route::delete('sales-orders/{salesOrder}', [SalesOrderController::class, 'destroy'])->name('sales-orders.destroy');
     Route::prefix('mechanic')->name('mechanic.')->group(function () {
         Route::get('/dashboard', [MechanicDashboardController::class, 'index'])->name('dashboard');

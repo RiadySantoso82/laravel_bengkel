@@ -81,6 +81,10 @@
                 <div class="row-detail"><span class="label">Margin</span><span class="value" style="color:#059669;">Rp {{ number_format(($salesOrder->total_amount - $salesOrder->discount) - $salesOrder->details->sum('cost_price'), 0) }}</span></div>
             </div></div>
 
+            @if ($salesOrder->payment_status === 'pending')
+            <a href="{{ route('sales-orders.edit', $salesOrder) }}" class="btn" style="width:100%;justify-content:center;margin-bottom:8px;background:#d97706;color:#fff;text-decoration:none;"><i class="fas fa-edit"></i> Edit Order</a>
+            <button type="button" class="btn" style="width:100%;justify-content:center;margin-bottom:8px;background:#059669;color:#fff;" onclick="openPaymentModal()"><i class="fas fa-credit-card"></i> Proses Pembayaran</button>
+            @endif
             <form method="POST" action="{{ route('sales-orders.destroy', $salesOrder) }}" onsubmit="confirmForm(this, 'Yakin ingin menghapus penjualan ini? Stok akan dikembalikan.')">
                 @csrf @method('DELETE')
                 <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center;"><i class="fas fa-trash"></i> Hapus Penjualan</button>
@@ -89,3 +93,41 @@
     </main>
 </div>
 @endsection
+
+<div class="modal-overlay" id="paymentModal">
+    <div class="modal-box" style="text-align:left;max-width:420px;padding:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h3 style="font-size:16px;color:#1a1a2e;margin:0;">Proses Pembayaran</h3>
+            <button onclick="closePaymentModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;">&times;</button>
+        </div>
+        <p style="font-size:14px;color:#475569;margin-bottom:16px;">Total tagihan: <strong>Rp {{ number_format($salesOrder->total_amount - $salesOrder->discount, 0) }}</strong></p>
+        <form method="POST" action="{{ route('sales-orders.process-payment', $salesOrder) }}">
+            @csrf
+            <div class="form-group" style="margin-bottom:16px;">
+                <label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:#333;">Metode Pembayaran</label>
+                <select name="payment_method_id" class="form-control" required>
+                    <option value="">-- Pilih --</option>
+                    @foreach (\App\Models\PaymentMethod::where('is_active', true)->get() as $pm)
+                    <option value="{{ $pm->id }}">{{ $pm->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+                <label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:#333;">Uang diterima (jika tunai)</label>
+                <input type="number" name="amount_received" class="form-control" value="{{ $salesOrder->total_amount - $salesOrder->discount }}" min="0">
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button type="submit" class="btn" style="flex:1;justify-content:center;background:#059669;color:#fff;"><i class="fas fa-check"></i> Konfirmasi</button>
+                <button type="button" class="btn" style="flex:1;justify-content:center;background:#e2e8f0;color:#475569;" onclick="closePaymentModal()">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function openPaymentModal() { document.getElementById('paymentModal').classList.add('active'); }
+function closePaymentModal() { document.getElementById('paymentModal').classList.remove('active'); }
+document.getElementById('paymentModal').addEventListener('click', function(e) { if (e.target === this) closePaymentModal(); });
+</script>
+@endpush
