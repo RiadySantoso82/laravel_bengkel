@@ -9,6 +9,7 @@ use App\Models\PaymentTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceController extends Controller
 {
@@ -57,7 +58,10 @@ class InvoiceController extends Controller
 
     public function edit(Invoice $invoice)
     {
-        $orders = ServiceOrder::with('customer')->latest()->get();
+        $invoice->load('payments');
+        $orders = ServiceOrder::with('customer')->where('id', $invoice->order_id)->orWhereNotIn('id', function ($q) {
+            $q->select('order_id')->from('invoices');
+        })->latest()->get();
         $paymentMethods = PaymentMethod::where('is_active', true)->orderBy('name')->get();
         return view('invoice.form', compact('invoice', 'orders', 'paymentMethods'));
     }
@@ -72,17 +76,32 @@ class InvoiceController extends Controller
             'payment_status' => 'required|in:pending,paid,partial',
         ]);
 
-        DB::transaction(function () use ($request, $invoice) {
-            $invoice->update($request->only(['order_id', 'total_amount', 'discount', 'payment_status']));
+        $updateData = [
+            'order_id' => $request->order_id,
+            'total_amount' => $request->total_amount,
+            'discount' => $request->discount ?? 0,
+            'payment_status' => $request->payment_status,
+        ];
 
-            if ($request->payment_method_id && $request->payment_status !== 'pending' && $invoice->payments()->count() === 0) {
-                PaymentTransaction::create([
+        DB::transaction(function () use ($request, $invoice, $updateData) {
+            $invoice->update($updateData);
+
+            DB::table('payment_transactions')
+                ->where('reference_type', 'invoice')
+                ->where('reference_id', $invoice->id)
+                ->delete();
+
+            if ($request->payment_method_id && $request->payment_status !== 'pending') {
+
+                DB::table('payment_transactions')->insert([
                     'reference_type' => 'invoice',
                     'reference_id' => $invoice->id,
                     'payment_method_id' => $request->payment_method_id,
                     'created_by' => Auth::id(),
                     'amount' => max(0, $request->total_amount - ($request->discount ?? 0)),
                     'paid_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             }
         });
@@ -94,6 +113,12 @@ class InvoiceController extends Controller
     {
         $invoice->delete();
         return redirect()->route('invoices.index')->with('success', 'Invoice berhasil dihapus.');
+    }
+
+    public function show(Invoice $invoice)
+    {
+        $invoice->load(['order.customer', 'order.vehicle', 'payments.paymentMethod']);
+        return view('invoice.show', compact('invoice'));
     }
 
     public function getOrderDetail(ServiceOrder $order)

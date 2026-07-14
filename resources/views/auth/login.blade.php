@@ -143,6 +143,12 @@
                 <i class="fas fa-sign-in-alt"></i> Login
             </button>
         </form>
+
+        <div style="text-align:center;margin-top:20px;padding-top:20px;border-top:1px solid #eee;">
+            <a href="{{ route('queue.display') }}" style="color:#0f3460;font-size:13px;text-decoration:none;">
+                <i class="fas fa-tv"></i> Lihat Antrian Servis
+            </a>
+        </div>
     </div>
 </div>
 @endsection

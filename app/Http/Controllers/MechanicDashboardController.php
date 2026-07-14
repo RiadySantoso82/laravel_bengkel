@@ -14,9 +14,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+// use Intervention\Image\Facades\Image;
 use App\Models\PartRequestDetail;
 use App\Models\PartReturn;
+use App\Models\Mechanic;
 
 class MechanicDashboardController extends Controller
 {
@@ -30,25 +31,31 @@ class MechanicDashboardController extends Controller
         });
     }
 
-    private function getMechanic()
+    private function mechanicIds()
     {
-        return Auth::user()->mechanic;
+        $user = Auth::user();
+        $linked = $user->mechanic;
+        $ids = [];
+        if ($linked) $ids[] = $linked->id;
+        $orphans = Mechanic::whereNull('user_id')->pluck('id')->toArray();
+        return array_unique(array_merge($ids, $orphans));
     }
 
     private function mechanicId()
     {
-        $m = $this->getMechanic();
-        return $m ? $m->id : 0;
+        $ids = $this->mechanicIds();
+        return $ids[0] ?? 0;
     }
 
     public function index()
     {
-        $mid = $this->mechanicId();
-        $activeCount = ServiceOrder::where('mechanic_id', $mid)->whereIn('status', ['queued', 'in_progress', 'waiting_part'])->count();
-        $completedCount = ServiceOrder::where('mechanic_id', $mid)->whereIn('status', ['done', 'picked_up'])->count();
+        $ids = $this->mechanicIds();
+        $activeCount = ServiceOrder::whereIn('mechanic_id', $ids)->whereIn('status', ['queued', 'in_progress', 'waiting_part'])->count();
+        $completedCount = ServiceOrder::whereIn('mechanic_id', $ids)->whereIn('status', ['done', 'picked_up'])->count();
 
         $chartDays = [];
         $chartCounts = [];
+        $ids = $this->mechanicIds();
         $heatmap = [];
         $slots = ['Sebelum 08:00'];
         for ($h = 8; $h <= 20; $h += 2) {
@@ -60,14 +67,14 @@ class MechanicDashboardController extends Controller
             $date = date('Y-m-d', strtotime("-$i days"));
             $dayLabel = date('d/m', strtotime($date));
 
-            $count = ServiceOrder::where('mechanic_id', $mid)
+            $count = ServiceOrder::whereIn('mechanic_id', $ids)
                 ->whereIn('status', ['done', 'picked_up'])
                 ->whereDate('actual_finish', $date)
                 ->count();
             $chartDays[] = $dayLabel;
             $chartCounts[] = $count;
 
-            $orders = ServiceOrder::where('mechanic_id', $mid)
+            $orders = ServiceOrder::whereIn('mechanic_id', $ids)
                 ->whereIn('status', ['done', 'picked_up'])
                 ->whereNotNull('actual_finish')
                 ->whereDate('actual_finish', $date)
@@ -105,13 +112,13 @@ class MechanicDashboardController extends Controller
 
     public function myServices()
     {
-        $data = ServiceOrder::with(['customer', 'vehicle', 'partRequests.details'])->where('mechanic_id', $this->mechanicId())->latest()->paginate(20);
+        $data = ServiceOrder::with(['customer', 'vehicle', 'partRequests.details'])->whereIn('mechanic_id', $this->mechanicIds())->latest()->paginate(20);
         return view('mechanic.services', compact('data'));
     }
 
     public function detail(ServiceOrder $serviceOrder)
     {
-        if ($serviceOrder->mechanic_id !== $this->mechanicId()) {
+        if (!in_array($serviceOrder->mechanic_id, $this->mechanicIds())) {
             abort(403);
         }
         $serviceOrder->load(['customer', 'vehicle', 'details']);
@@ -148,7 +155,7 @@ class MechanicDashboardController extends Controller
             $d2 = date('Y-m-d');
         }
 
-        $query = ServiceOrder::with(['customer', 'vehicle'])->where('mechanic_id', $this->mechanicId())->whereIn('status', ['done', 'picked_up']);
+        $query = ServiceOrder::with(['customer', 'vehicle'])->whereIn('mechanic_id', $this->mechanicIds())->whereIn('status', ['done', 'picked_up']);
 
         if ($d1) {
             $query->whereDate('actual_finish', '>=', $d1);
@@ -163,7 +170,7 @@ class MechanicDashboardController extends Controller
 
     public function saveProgress(Request $request, ServiceOrder $serviceOrder)
     {
-        if ($serviceOrder->mechanic_id !== $this->mechanicId()) {
+        if (!in_array($serviceOrder->mechanic_id, $this->mechanicIds())) {
             abort(403);
         }
 
@@ -197,12 +204,9 @@ class MechanicDashboardController extends Controller
 
             if ($request->hasFile('photos')) {
                 foreach ($request->file('photos') as $file) {
-                    $img = Image::make($file);
-                    $img->resize(1200, null, function ($c) { $c->aspectRatio(); });
-                    $img->encode('jpg', 75);
                     $filename = uniqid() . '.jpg';
                     $relPath = 'service-photos/' . $serviceOrder->id . '/' . $filename;
-                    Storage::disk('public')->put($relPath, $img->getEncoded());
+                    Storage::disk('public')->put($relPath, file_get_contents($file));
                     ServiceOrderPhoto::create([
                         'order_id' => $serviceOrder->id,
                         'user_id' => Auth::id(),
@@ -228,7 +232,7 @@ class MechanicDashboardController extends Controller
 
     public function requestPart(Request $request, ServiceOrder $serviceOrder)
     {
-        if ($serviceOrder->mechanic_id !== $this->mechanicId()) {
+        if (!in_array($serviceOrder->mechanic_id, $this->mechanicIds())) {
             abort(403);
         }
 

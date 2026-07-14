@@ -255,9 +255,81 @@ Menu Pengaturan → Reset Data
 ```bash
 # Jalankan server
 php artisan serve --port=8001
-
-# Login sebagai:
-# admin / admin123   → full akses
-# kasir / kasir123   → transaksi & master
-# mekanik / mekanik123 → panel mekanik
 ```
+
+## Login Default
+
+| Role | Username | Password |
+|------|----------|----------|
+| Admin | `admin` | `admin123` |
+| Kasir | `kasir` | `kasir123` |
+| Mekanik | `mekanik` | `mekanik123` |
+
+---
+
+## 🧪 Testing (PHPUnit)
+
+Tests menggunakan **SQLite in-memory** agar tidak mengganggu database utama.
+
+### Persiapan
+
+Tests menggunakan database MySQL terpisah `bengkel_test`.
+
+```sql
+CREATE DATABASE IF NOT EXISTS bengkel_test;
+```
+
+Pastikan kredensial di `.env` bisa mengakses database tersebut (user/password sama dengan database utama).
+
+### Menjalankan semua test
+
+```bash
+php artisan test
+```
+
+Atau dengan PHPUnit langsung:
+
+```bash
+.\vendor\bin\phpunit
+```
+
+### Menjalankan test spesifik
+
+```bash
+php artisan test --filter InvoiceTest
+php artisan test --filter SalesOrderTest
+php artisan test --filter test_invoice_store_with_payment
+```
+
+### Menambahkan Test Baru
+
+Buat file di `tests/Feature/` dengan suffix `Test.php`:
+
+```php
+<?php
+
+namespace Tests\Feature;
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class ContohTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_example()
+    {
+        $response = $this->get('/');
+        $response->assertStatus(302);
+    }
+}
+```
+
+Gunakan trait `RefreshDatabase` agar setiap test dimulai dari database bersih.
+
+### Test yang tersedia
+
+| File | Menguji |
+|------|---------|
+| `InvoiceTest.php` | Buat invoice + payment, pending tanpa payment, edit ubah ke paid |
+| `SalesOrderTest.php` | Store paid (stok berkurang), store pending (stok tetap), process payment |

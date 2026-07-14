@@ -23,10 +23,15 @@ use App\Http\Controllers\PartRequestController;
 use App\Http\Controllers\PartReturnController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\CashCategoryController;
+use App\Http\Controllers\CashTransactionController;
 use App\Http\Controllers\SalesOrderController;
+use App\Http\Controllers\QueueDisplayController;
 Route::get('/', function () {
     return redirect()->route('login');
 });
+
+Route::get('/queue', [QueueDisplayController::class, 'index'])->name('queue.display');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -58,6 +63,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/invoices/order-detail/{order}', [InvoiceController::class, 'getOrderDetail'])->name('invoices.order-detail');
     Route::resource('invoices', InvoiceController::class);
     Route::resource('users', UserController::class);
+    Route::post('cash-categories/seed-default', [CashCategoryController::class, 'seedDefault'])->name('cash-categories.seed');
+    Route::get('cash-transactions', [CashTransactionController::class, 'index'])->name('cash-transactions.index');
+    Route::get('cash-transactions/create', [CashTransactionController::class, 'create'])->name('cash-transactions.create');
+    Route::post('cash-transactions', [CashTransactionController::class, 'store'])->name('cash-transactions.store');
+    Route::delete('cash-transactions/{cashTransaction}', [CashTransactionController::class, 'destroy'])->name('cash-transactions.destroy');
+    Route::resource('cash-categories', CashCategoryController::class);
     Route::post('checklist-items/demo', [ChecklistItemController::class, 'demo'])->name('checklist-items.demo');
     Route::resource('checklist-items', ChecklistItemController::class);
     Route::get('part-requests', [PartRequestController::class, 'index'])->name('part-requests.index');
@@ -66,6 +77,10 @@ Route::middleware('auth')->group(function () {
     Route::post('part-returns/{partReturn}/confirm', [PartReturnController::class, 'confirm'])->name('part-returns.confirm');
     Route::get('reports/movements', [ReportController::class, 'movements'])->name('reports.movements');
     Route::get('reports/stock', [ReportController::class, 'stock'])->name('reports.stock');
+    Route::get('reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
+    Route::get('reports/cash', [ReportController::class, 'cash'])->name('reports.cash');
+    Route::get('reports/services', [ReportController::class, 'services'])->name('reports.services');
+    Route::get('reports/revenue', [ReportController::class, 'revenue'])->name('reports.revenue');
     Route::get('stock-adjustments', [StockAdjustmentController::class, 'index'])->name('stock-adjustments.index');
     Route::get('stock-adjustments/create', [StockAdjustmentController::class, 'create'])->name('stock-adjustments.create');
     Route::get('stock-adjustments/search', [StockAdjustmentController::class, 'search'])->name('stock-adjustments.search');

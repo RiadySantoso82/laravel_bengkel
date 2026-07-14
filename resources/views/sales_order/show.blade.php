@@ -30,7 +30,7 @@
     <main class="main-content">
         <div class="detail-container">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
-                <a href="{{ route('sales-orders.index') }}" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+                <a href="{{ request('from') === 'report' ? route('reports.sales') : route('sales-orders.index') }}" class="back-btn"><i class="fas fa-arrow-left"></i></a>
                 <p style="font-weight:500;font-size:15px;margin:0;">Detail Penjualan</p>
             </div>
 
@@ -81,14 +81,16 @@
                 <div class="row-detail"><span class="label">Margin</span><span class="value" style="color:#059669;">Rp {{ number_format(($salesOrder->total_amount - $salesOrder->discount) - $salesOrder->details->sum('cost_price'), 0) }}</span></div>
             </div></div>
 
-            @if ($salesOrder->payment_status === 'pending')
+            @if ($salesOrder->payment_status === 'pending' && request('from') !== 'report')
             <a href="{{ route('sales-orders.edit', $salesOrder) }}" class="btn" style="width:100%;justify-content:center;margin-bottom:8px;background:#d97706;color:#fff;text-decoration:none;"><i class="fas fa-edit"></i> Edit Order</a>
             <button type="button" class="btn" style="width:100%;justify-content:center;margin-bottom:8px;background:#059669;color:#fff;" onclick="openPaymentModal()"><i class="fas fa-credit-card"></i> Proses Pembayaran</button>
             @endif
+            @if (request('from') !== 'report')
             <form method="POST" action="{{ route('sales-orders.destroy', $salesOrder) }}" onsubmit="confirmForm(this, 'Yakin ingin menghapus penjualan ini? Stok akan dikembalikan.')">
                 @csrf @method('DELETE')
                 <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center;"><i class="fas fa-trash"></i> Hapus Penjualan</button>
             </form>
+            @endif
         </div>
     </main>
 </div>

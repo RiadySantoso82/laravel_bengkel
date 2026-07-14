@@ -255,8 +255,8 @@ function addItem(data) {
                 ` + serviceTypes.map(j => '<option value="' + j.id + '" data-price="' + (j.base_price || 0) + '">' + j.name + '</option>').join('') + `
             </select>
         </td>
-        <td><input type="number" name="items[` + i + `][qty]" value="` + data.qty + `" min="1" class="form-control" style="font-size:13px;padding:6px 8px;" onchange="calcRow(` + i + `)" onkeyup="calcRow(` + i + `)"></td>
-        <td><input type="number" name="items[` + i + `][price]" value="` + data.price + `" min="0" class="form-control" style="font-size:13px;padding:6px 8px;" onchange="calcRow(` + i + `)" onkeyup="calcRow(` + i + `)"></td>
+        <td><input type="number" name="items[` + i + `][qty]" value="` + data.qty + `" min="1" class="form-control no-cleave" style="font-size:13px;padding:6px 8px;" onchange="calcRow(` + i + `)" onkeyup="calcRow(` + i + `)"></td>
+        <td><input type="number" name="items[` + i + `][price]" value="` + data.price + `" min="0" class="form-control" style="font-size:13px;padding:6px 8px;" onchange="calcRow(` + i + `);var evt=document.createEvent('HTMLEvents');evt.initEvent('cleave-update',true,false);document.dispatchEvent(evt);" onkeyup="calcRow(` + i + `)"></td>
         <td class="item-total" id="subtotal-` + i + `">` + (data.qty * data.price).toLocaleString() + `</td>
         <td><button type="button" class="btn btn-danger btn-sm" onclick="document.getElementById('item-' + i).remove(); calcGrandTotal();"><i class="fas fa-times"></i></button></td>
     `;

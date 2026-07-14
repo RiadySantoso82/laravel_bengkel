@@ -43,6 +43,7 @@
         </a>
         <a href="{{ route('invoices.index') }}"><i class="fas fa-file-invoice-dollar"></i> Invoice</a>
         <a href="{{ route('sales-orders.index') }}"><i class="fas fa-shopping-cart"></i> Penjualan</a>
+        <a href="{{ route('cash-transactions.index') }}"><i class="fas fa-money-check-alt"></i> Kas</a>
         <a href="{{ route('stock-adjustments.index') }}"><i class="fas fa-balance-scale"></i> Stock Adjustment</a>
 
         <div class="nav-section">Data Master</div>
@@ -56,8 +57,13 @@
         <a href="{{ route('service-categories.index') }}"><i class="fas fa-toolbox"></i> Kategori Servis</a>
         <a href="{{ route('payment-methods.index') }}"><i class="fas fa-credit-card"></i> Metode Bayar</a>
         <a href="{{ route('checklist-items.index') }}"><i class="fas fa-clipboard-list"></i> Checklist Item</a>
+        <a href="{{ route('cash-categories.index') }}"><i class="fas fa-money-bill-wave"></i> Kategori Kas</a>
 
         <div class="nav-section">Laporan</div>
+        <a href="{{ route('reports.revenue') }}"><i class="fas fa-chart-line"></i> Pendapatan</a>
+        <a href="{{ route('reports.services') }}"><i class="fas fa-wrench"></i> Servis</a>
+        <a href="{{ route('reports.sales') }}"><i class="fas fa-shopping-cart"></i> Penjualan</a>
+        <a href="{{ route('reports.cash') }}"><i class="fas fa-money-check-alt"></i> Kas</a>
         <a href="{{ route('reports.stock') }}"><i class="fas fa-boxes"></i> Sisa Stok</a>
         <a href="{{ route('reports.movements') }}"><i class="fas fa-exchange-alt"></i> Stock Movement</a>
 

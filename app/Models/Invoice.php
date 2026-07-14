@@ -16,6 +16,6 @@ class Invoice extends Model
 
     public function payments()
     {
-        return $this->morphMany(PaymentTransaction::class, 'reference', 'reference_type', 'reference_id');
+        return $this->hasMany(PaymentTransaction::class, 'reference_id')->where('reference_type', 'invoice');
     }
 }

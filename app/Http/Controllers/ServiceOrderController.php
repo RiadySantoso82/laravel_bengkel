@@ -14,10 +14,21 @@ use Illuminate\Support\Facades\Auth;
 
 class ServiceOrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data = ServiceOrder::with(['customer', 'vehicle', 'mechanic'])->latest()->get();
-        return view('service_order.index', compact('data'));
+        $from = $request->date_from ?? date('Y-m-d', strtotime('-30 days'));
+        $to = $request->date_to ?? date('Y-m-d');
+
+        $query = ServiceOrder::with(['customer', 'vehicle', 'mechanic']);
+        if ($from) $query->whereDate('created_at', '>=', $from);
+        if ($to) $query->whereDate('created_at', '<=', $to);
+        if ($request->status) $query->where('status', $request->status);
+
+        $data = $query->latest()->paginate(20)->appends([
+            'date_from' => $from, 'date_to' => $to, 'status' => $request->status,
+        ]);
+
+        return view('service_order.index', compact('data', 'from', 'to'));
     }
 
     public function create()

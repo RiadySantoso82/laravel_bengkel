@@ -9,6 +9,7 @@
     .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: all 0.3s; }
     .btn-primary { background: #0f3460; color: #fff; }
     .btn-primary:hover { background: #1a1a2e; }
+    .btn-secondary { background: #e2e8f0; color: #475569; }
     .btn-warning { background: #d97706; color: #fff; }
     .btn-warning:hover { background: #b45309; }
     .btn-danger { background: #dc2626; color: #fff; }
@@ -29,6 +30,9 @@
     .badge-waiting { background: #fce7f3; color: #9d174d; }
     .badge-done { background: #d1fae5; color: #065f46; }
     .badge-picked { background: #e0e7ff; color: #3730a3; }
+    .pagination { display:flex;gap:4px;justify-content:center;margin-top:16px; }
+    .pagination a,.pagination span { padding:6px 12px;border-radius:6px;font-size:13px;text-decoration:none;color:#475569;background:#fff;border:1px solid #e2e8f0; }
+    .pagination .active { background:#0f3460;color:#fff;border-color:#0f3460; }
 </style>
 @endpush
 
@@ -43,6 +47,24 @@
         @if (session('success'))
             <div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
         @endif
+
+        <form method="GET" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;padding:16px 20px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <div><label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px;">Dari</label><input type="date" name="date_from" value="{{ $from }}" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"></div>
+            <div><label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px;">Sampai</label><input type="date" name="date_to" value="{{ $to }}" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"></div>
+            <div><label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px;">Status</label>
+                <select name="status" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+                    <option value="">Semua</option>
+                    <option value="queued" {{ request('status')==='queued' ? 'selected' : '' }}>Antri</option>
+                    <option value="in_progress" {{ request('status')==='in_progress' ? 'selected' : '' }}>Dikerjakan</option>
+                    <option value="waiting_part" {{ request('status')==='waiting_part' ? 'selected' : '' }}>Tunggu Part</option>
+                    <option value="done" {{ request('status')==='done' ? 'selected' : '' }}>Selesai</option>
+                    <option value="picked_up" {{ request('status')==='picked_up' ? 'selected' : '' }}>Diambil</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" style="padding:8px 16px;"><i class="fas fa-search"></i></button>
+            <a href="{{ route('service-orders.index') }}" class="btn btn-secondary" style="padding:8px 16px;text-decoration:none;"><i class="fas fa-undo"></i></a>
+        </form>
+
         <div class="card">
             <div class="card-body">
                 @if ($data->isEmpty())
@@ -75,6 +97,9 @@
                 @endif
             </div>
         </div>
+        @if ($data->hasPages())
+        <div style="margin-top:16px;">{{ $data->links() }}</div>
+        @endif
     </main>
 </div>
 @endsection

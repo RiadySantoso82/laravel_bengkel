@@ -204,7 +204,8 @@ class SalesOrderController extends Controller
                 'customer_id' => $request->customer_id,
             ]);
 
-            $salesOrder->details()->delete();
+                PaymentTransaction::where('reference_type', 'sales_order')->where('reference_id', $salesOrder->id)->delete();
+                $salesOrder->details()->delete();
             $newDetails = [];
             foreach ($items as $item) {
                 $newDetails[] = SalesOrderDetail::create([

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>@yield('title', 'Bengkel')</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.6.0/cleave.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; min-height: 100vh; }
@@ -108,6 +109,21 @@
     <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
     <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
 
+    @if (session('validation_error'))
+    <div style="position:fixed;top:70px;right:16px;z-index:9998;max-width:400px;padding:14px 18px;border-radius:10px;background:#fde8e8;color:#991b1b;border:1px solid #f8c0c0;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,0.1);">
+        <strong><i class="fas fa-exclamation-circle"></i> Validasi Gagal:</strong><br>
+        {!! session('validation_error') !!}
+        <button onclick="this.parentElement.remove()" style="position:absolute;top:6px;right:8px;background:none;border:none;font-size:16px;cursor:pointer;color:#991b1b;">&times;</button>
+    </div>
+    @endif
+
+    @if (session('error'))
+    <div style="position:fixed;top:70px;right:16px;z-index:9998;max-width:400px;padding:14px 18px;border-radius:10px;background:#fde8e8;color:#991b1b;border:1px solid #f8c0c0;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,0.1);">
+        <i class="fas fa-exclamation-circle"></i> {!! session('error') !!}
+        <button onclick="this.parentElement.remove()" style="position:absolute;top:6px;right:8px;background:none;border:none;font-size:16px;cursor:pointer;color:#991b1b;">&times;</button>
+    </div>
+    @endif
+
     @yield('content')
 
     <div class="modal-overlay" id="logoutModal">
@@ -137,6 +153,33 @@
 
     <script>
         let confirmCallback = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            applyCleave();
+            document.addEventListener('cleave-update', function() { setTimeout(applyCleave, 50); });
+        });
+
+        function applyCleave() {
+            document.querySelectorAll('input[type="number"]:not([data-cleave])').forEach(function(el) {
+                if (el.classList.contains('no-cleave')) return;
+                el.setAttribute('data-cleave', '1');
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = el.name;
+                el.parentNode.insertBefore(hidden, el);
+                el.name = el.name + '_fmt';
+                el.type = 'text';
+                el.inputMode = 'numeric';
+                try {
+                    new Cleave(el, {
+                        numeral: true,
+                        numeralThousandsGroupStyle: 'thousand',
+                        numeralDecimalScale: 0,
+                        onValueChanged: function(e) { hidden.value = e.target.rawValue; }
+                    });
+                } catch(e) {}
+            });
+        }
 
         function toggleSidebar() {
             document.querySelector('.sidebar').classList.toggle('open');

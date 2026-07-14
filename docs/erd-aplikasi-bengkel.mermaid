@@ -50,6 +50,8 @@ erDiagram
     STOCK_MOVEMENT |o--o| STOCK_BATCH : membentuk
     STOCK_BATCH ||--o{ STOCK_MOVEMENT_ALLOCATION : dialokasikan_dari
     STOCK_MOVEMENT ||--o{ STOCK_MOVEMENT_ALLOCATION : mengalokasikan
+    CASH_CATEGORY ||--o{ CASH_TRANSACTION : mengelompokkan
+    USER ||--o{ CASH_TRANSACTION : mencatat
 
     CUSTOMER {
         int customer_id PK
@@ -321,4 +323,23 @@ erDiagram
         string reference_number "kode approval EDC / no ref QRIS / no ref transfer"
         string proof_url "bukti transfer, opsional"
         datetime paid_at
+    }
+
+    CASH_CATEGORY {
+        int cash_category_id PK
+        string name
+        string type "in atau out"
+        boolean is_active
+    }
+
+    CASH_TRANSACTION {
+        int cash_transaction_id PK
+        int cash_category_id FK
+        int user_id FK
+        string type "in atau out"
+        decimal amount
+        string description
+        string proof_url "opsional, foto kwitansi/bukti bayar"
+        date transaction_date
+        datetime created_at
     }

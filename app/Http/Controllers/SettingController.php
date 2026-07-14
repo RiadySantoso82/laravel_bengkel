@@ -30,6 +30,7 @@ class SettingController extends Controller
             'vehicles', 'customers', 'suppliers', 'mechanics',
             'spareparts', 'sparepart_categories', 'units',
             'service_types', 'service_categories', 'payment_methods',
+            'cash_transactions', 'cash_categories',
         ];
 
         Auth::logout();

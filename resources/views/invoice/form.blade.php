@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', isset($invoice) ? 'Edit Invoice' : 'Buat Invoice')
+@section('title', isset($invoice) && $invoice ? 'Edit Invoice' : 'Buat Invoice')
 
 @push('styles')
 <style>
@@ -31,27 +31,30 @@
     <main class="main-content">
         <div class="page-header"><h1><i class="fas fa-file-invoice-dollar"></i> {{ isset($invoice) ? 'Edit Invoice' : 'Buat Invoice' }}</h1></div>
         <div class="card"><div class="card-body">
-            <form method="POST" action="{{ isset($invoice) ? route('invoices.update', $invoice) : route('invoices.store') }}">
-                @csrf @if (isset($invoice)) @method('PUT') @endif
+            <form method="POST" action="{{ isset($invoice) && $invoice ? route('invoices.update', $invoice) : route('invoices.store') }}">
+                @csrf @if (isset($invoice) && $invoice) @method('PUT') @endif
 
-                @if (!isset($invoice))
                 <div class="form-group">
-                    <label for="order_id">Service Order</label>
-                    <select id="order_id" name="order_id" class="form-control" required onchange="loadOrder(this.value)">
-                        <option value="">-- Pilih --</option>
-                        @foreach ($orders as $o)
-                            <option value="{{ $o->id }}" data-total="{{ $o->details->sum(function($d) { return $d->qty * $d->price; }) }}" {{ old('order_id', $invoice->order_id ?? '') == $o->id ? 'selected' : '' }}>
-                                SO-{{ str_pad($o->id, 4, '0', STR_PAD_LEFT) }} - {{ $o->customer->name ?? '' }} - {{ $o->vehicle->plate_number ?? '' }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="info-box" id="order-info" style="display:none;">
-                    <strong>Ringkasan Service Order</strong><br>
-                    <span id="order-detail"></span>
-                </div>
+                <label for="order_id">Service Order</label>
+                @if (isset($invoice))
+                <input type="text" class="form-control" value="SO-{{ str_pad($invoice->order_id, 4, '0', STR_PAD_LEFT) }}" readonly>
+                <input type="hidden" name="order_id" value="{{ $invoice->order_id }}">
+                @else
+                <select id="order_id" name="order_id" class="form-control" required onchange="loadOrder(this.value)">
+                    <option value="">-- Pilih --</option>
+                    @foreach ($orders as $o)
+                        <option value="{{ $o->id }}" data-total="{{ $o->details->sum(function($d) { return $d->qty * $d->price; }) }}" {{ old('order_id', $invoice->order_id ?? '') == $o->id ? 'selected' : '' }}>
+                            SO-{{ str_pad($o->id, 4, '0', STR_PAD_LEFT) }} - {{ $o->customer->name ?? '' }} - {{ $o->vehicle->plate_number ?? '' }}
+                        </option>
+                    @endforeach
+                </select>
                 @endif
+            </div>
+
+            <div class="info-box" id="order-info" style="{{ isset($invoice) && $invoice->order_id ? 'display:block' : 'display:none' }};">
+                <strong>Ringkasan Service Order</strong><br>
+                <span id="order-detail"></span>
+            </div>
 
                 <div class="row">
                     <div class="form-group">
@@ -74,7 +77,7 @@
                         <select id="payment_method_id" name="payment_method_id" class="form-control">
                             <option value="">-- Pilih --</option>
                             @foreach ($paymentMethods as $pm)
-                                <option value="{{ $pm->id }}" {{ old('payment_method_id', $invoice->payment_method_id ?? '') == $pm->id ? 'selected' : '' }}>{{ $pm->name }}</option>
+                                <option value="{{ $pm->id }}" {{ old('payment_method_id', optional($invoice->payments->first())->payment_method_id ?? '') == $pm->id ? 'selected' : '' }}>{{ $pm->name }}</option>
                             @endforeach
                         </select>
                     </div>
